@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>COCO.EDU — Đề thi</title>
+<style>
+  :root{
+    --bg:#f4faf6;
+    --panel:#ffffff;
+    --border:#d7ecdd;
+    --green:#16a34a;
+    --green-dark:#0f7a37;
+    --green-soft:#e6f7ec;
+    --text:#173321;
+    --muted:#6b8073;
+    --red:#e0433d;
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0;
+    font-family:'Segoe UI',system-ui,-apple-system,sans-serif;
+    background:var(--bg);
+    color:var(--text);
+    min-height:100vh;
+    user-select:none;-webkit-user-select:none;
+    padding:36px 16px 100px;
+    transition:filter .25s ease;
+  }
+  body.blurred{filter:blur(18px) brightness(.85);}
+
+  .wrap{max-width:820px;margin:0 auto;}
+
+  .brand{display:flex;align-items:center;justify-content:center;gap:10px;margin-bottom:6px;}
+  .brand .logo{
+    width:38px;height:38px;border-radius:10px;
+    background:linear-gradient(135deg,var(--green),var(--green-dark));
+    display:flex;align-items:center;justify-content:center;font-size:20px;
+  }
+  .brand h1{
+    font-size:1.6rem;margin:0;letter-spacing:.5px;color:var(--green-dark);font-weight:800;
+  }
+  header{text-align:center;margin-bottom:30px;}
+  header p{color:var(--muted);margin:6px 0 0;font-size:.92rem;}
+
+  .warning{
+    background:#fff7ed;border:1px solid #fed7aa;color:#9a5b12;
+    padding:12px 16px;border-radius:10px;font-size:.85rem;margin-bottom:24px;line-height:1.5;
+  }
+
+  /* ---------- Màn hình cam kết / cổng bắt đầu ---------- */
+  #gate{
+    background:var(--panel);border:1px solid var(--border);border-radius:16px;
+    padding:32px 28px;box-shadow:0 10px 30px rgba(22,163,74,.08);
+  }
+  #gate h2{margin-top:0;color:var(--green-dark);}
+  #gate ul{padding-left:20px;line-height:1.9;font-size:.92rem;}
+  #gate ul li b{color:var(--green-dark);}
+  #cam-preview{
+    width:180px;height:135px;border-radius:10px;border:2px solid var(--border);
+    background:#000;display:none;margin:14px auto;object-fit:cover;
+  }
+  #gate-status{font-size:.85rem;color:var(--red);min-height:20px;margin-top:10px;text-align:center;}
+  .start-bar{text-align:center;margin-top:18px;}
+  button.start{
+    background:linear-gradient(90deg,var(--green),var(--green-dark));
+    border:none;color:#fff;font-size:1rem;font-weight:700;
+    padding:14px 40px;border-radius:999px;cursor:pointer;letter-spacing:.3px;
+  }
+  button.start:disabled{opacity:.6;cursor:wait;}
+
+  /* ---------- Bài thi ---------- */
+  #exam{display:none;}
+  .card{
+    background:var(--panel);border:1px solid var(--border);border-radius:14px;
+    padding:22px 24px;margin-bottom:18px;box-shadow:0 4px 16px rgba(22,163,74,.06);
+  }
+  .card .qtag{
+    display:inline-block;font-size:.7rem;letter-spacing:1px;text-transform:uppercase;
+    color:var(--green-dark);background:var(--green-soft);border:1px solid #bfe8cd;
+    padding:2px 10px;border-radius:999px;margin-bottom:10px;
+  }
+  .card.essay .qtag{color:#a8460f;background:#fff1e6;border-color:#f6d3b6;}
+  .card h3{margin:0 0 14px;font-size:1.02rem;line-height:1.6;font-weight:600;}
+
+  .options{display:flex;flex-direction:column;gap:10px;}
+  .option{
+    display:flex;align-items:flex-start;gap:10px;
+    background:#fafffb;border:1px solid var(--border);
+    border-radius:10px;padding:10px 14px;cursor:pointer;
+    transition:border-color .15s, background .15s;
+  }
+  .option:hover{border-color:var(--green);background:var(--green-soft);}
+  .option input{accent-color:var(--green);margin-top:3px;}
+  .option span{font-size:.9rem;line-height:1.5;}
+
+  textarea{
+    width:100%;min-height:110px;
+    background:#fafffb;border:1px solid var(--border);
+    border-radius:10px;color:var(--text);
+    padding:12px 14px;font-size:.92rem;font-family:inherit;
+    resize:vertical;user-select:text;-webkit-user-select:text;
+  }
+  textarea:focus{outline:none;border-color:var(--green);}
+
+  .submit-bar{text-align:center;margin-top:30px;}
+  button.submit{
+    background:linear-gradient(90deg,var(--green),var(--green-dark));
+    border:none;color:#fff;font-size:1rem;font-weight:700;
+    padding:14px 40px;border-radius:999px;cursor:pointer;letter-spacing:.4px;
+  }
+
+  /* ---------- Overlay khoá khi thoát toàn màn hình ---------- */
+  #fs-lock{
+    position:fixed;inset:0;z-index:9998;
+    background:rgba(10,20,14,.94);
+    display:none;align-items:center;justify-content:center;text-align:center;color:#fff;
+    padding:20px;
+  }
+  #fs-lock .box{max-width:420px;}
+  #fs-lock h2{color:#ffb4b4;margin-bottom:10px;}
+  #fs-lock button{
+    margin-top:16px;background:linear-gradient(90deg,var(--green),var(--green-dark));
+    border:none;color:#fff;font-weight:700;padding:12px 30px;border-radius:999px;cursor:pointer;
+  }
+
+  /* watermark động */
+  #watermark{position:fixed;inset:0;pointer-events:none;z-index:9990;overflow:hidden;opacity:.05;}
+  #watermark span{position:absolute;white-space:nowrap;font-size:13px;color:#0f7a37;transform:rotate(-30deg);}
+
+  /* nút admin ẩn ở góc màn hình */
+  #admin-trigger{position:fixed;right:0;bottom:0;width:28px;height:28px;opacity:0;cursor:default;z-index:10000;background:transparent;border:none;}
+
+  /* ---------- Bảng admin xem nhanh (ngay trong trang) ---------- */
+  #admin-panel{
+    position:fixed;inset:0;z-index:10001;background:rgba(10,20,14,.55);
+    display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow:auto;
+  }
+  #admin-panel .box{
+    background:#fff;border-radius:16px;max-width:760px;width:100%;padding:24px;
+    box-shadow:0 20px 50px rgba(0,0,0,.3);
+  }
+  #admin-panel h2{color:var(--green-dark);margin-top:0;display:flex;justify-content:space-between;align-items:center;}
+  #admin-panel h2 .close{cursor:pointer;color:var(--muted);font-size:1rem;font-weight:400;}
+  #admin-panel table{width:100%;border-collapse:collapse;font-size:.85rem;}
+  #admin-panel th,#admin-panel td{padding:9px 8px;border-bottom:1px solid var(--border);text-align:left;}
+  #admin-panel th{color:var(--muted);font-size:.72rem;text-transform:uppercase;}
+  #admin-panel .badge{padding:2px 9px;border-radius:999px;font-size:.72rem;font-weight:700;}
+  .b-graded{background:#e6f7ec;color:#0f7a37;}
+  .b-pending{background:#fff7ed;color:#9a5b12;}
+  #admin-panel .link-btn{color:var(--green-dark);text-decoration:none;font-weight:600;font-size:.82rem;cursor:pointer;}
+  #admin-panel .snap-thumbs{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px;}
+  #admin-panel .snap-thumbs img{width:64px;height:48px;object-fit:cover;border-radius:6px;border:1px solid var(--border);}
+  #admin-panel .empty{color:var(--muted);text-align:center;padding:30px 0;}
+</style>
+</head>
+<body>
+
+<div id="watermark"></div>
+
+<div class="wrap">
+  <header>
+    <div class="brand">
+      <div class="logo">🥥</div>
+      <h1>COCO.EDU</h1>
+    </div>
+    <p>5 câu trắc nghiệm · 10 câu tự luận — không có đáp án mẫu, người ra đề tự chấm tay.</p>
+  </header>
+
+  <div class="warning">
+    ⚠️ Mỗi địa chỉ IP chỉ được làm bài <b>một lần duy nhất</b>. Bài thi yêu cầu chế độ
+    toàn màn hình và quyền camera trong suốt quá trình làm bài để đảm bảo tính trung thực —
+    xem chi tiết bên dưới trước khi bắt đầu.
+  </div>
+
+  <!-- ===================== CỔNG BẮT ĐẦU ===================== -->
+  <div id="gate">
+    <h2>Trước khi bắt đầu</h2>
+    <ul>
+      <li>Bài thi sẽ chuyển sang <b>chế độ toàn màn hình</b>. Nếu bạn thoát ra
+        (nhấn Esc, F11, đổi cửa sổ...), bài thi sẽ <b>tạm khoá</b> cho đến khi bạn
+        quay lại toàn màn hình.</li>
+      <li>Bài thi cần <b>quyền truy cập camera</b>. Hệ thống sẽ tự động chụp một vài
+        ảnh nhanh (không quay video) tại các thời điểm ngẫu nhiên, từ lúc bắt đầu đến
+        lúc nộp bài, để người ra đề xem lại khi chấm.</li>
+      <li>Không có đáp án mẫu — người ra đề sẽ chấm tay và cho điểm từng câu.</li>
+      <li>Bạn chỉ được làm bài <b>một lần</b> theo địa chỉ IP.</li>
+    </ul>
+    <video id="cam-preview" autoplay muted playsinline></video>
+    <div id="gate-status"></div>
+    <div class="start-bar">
+      <button class="start" id="start-btn">TÔI ĐỒNG Ý &amp; BẮT ĐẦU LÀM BÀI</button>
+    </div>
+  </div>
+
+  <!-- ===================== BÀI THI ===================== -->
+  <form id="exam" action="{{ url_for('submit') }}" method="POST" autocomplete="off">
+
+    {% for q in mcq_questions %}
+    <div class="card">
+      <span class="qtag">Trắc nghiệm {{ loop.index }}</span>
+      <h3>{{ q.text }}</h3>
+      <div class="options">
+        {% for key, val in q.options.items() %}
+        <label class="option">
+          <input type="radio" name="{{ q.id }}" value="{{ key }}" required>
+          <span><b>{{ key }}.</b> {{ val }}</span>
+        </label>
+        {% endfor %}
+      </div>
+    </div>
+    {% endfor %}
+
+    {% for q in essay_questions %}
+    <div class="card essay">
+      <span class="qtag">Tự luận {{ loop.index }}</span>
+      <h3>{{ q.text }}</h3>
+      <textarea name="{{ q.id }}" placeholder="Trình bày lời giải / lập luận của bạn..." required></textarea>
+    </div>
+    {% endfor %}
+
+    <div class="submit-bar">
+      <button type="submit" class="submit" id="submit-btn">NỘP BÀI</button>
+    </div>
+  </form>
+</div>
+
+<!-- overlay khoá khi thoát fullscreen -->
+<div id="fs-lock">
+  <div class="box">
+    <h2>⛔ Bạn đã thoát chế độ toàn màn hình</h2>
+    <p>Bài thi đã bị tạm khoá. Vui lòng quay lại chế độ toàn màn hình để tiếp tục làm bài.</p>
+    <button id="refs-btn">QUAY LẠI TOÀN MÀN HÌNH</button>
+  </div>
+</div>
+
+<!-- nút ẩn góc màn hình cho người ra đề -->
+<button id="admin-trigger" aria-hidden="true" tabindex="-1"></button>
+
+<!-- bảng xem nhanh danh sách bài làm, hiện ngay trong trang -->
+<div id="admin-panel">
+  <div class="box">
+    <h2>Danh sách bài làm <span class="close" id="admin-close">Đóng ✕</span></h2>
+    <div id="admin-body">Đang tải...</div>
+  </div>
+</div>
+
+<script>
+  const CLIENT_IP = {{ client_ip|tojson }};
+  const START_URL = "{{ url_for('session_start') }}";
+  const SNAPSHOT_URL = "{{ url_for('session_snapshot') }}";
+  const VIOLATION_URL = "{{ url_for('session_violation') }}";
+  const ADMIN_SUBMISSIONS_URL = "{{ url_for('api_admin_submissions') }}";
+  const ADMIN_SNAPSHOTS_BASE = "{{ url_for('api_admin_snapshots', ip_key='__IP__') }}";
+  const ADMIN_LOGIN_URL = "{{ url_for('admin_login') }}";
+  const ADMIN_GRADE_BASE = "{{ url_for('admin_grade', ip_key='__IP__') }}";
+
+  // ---- watermark động (IP + thời gian) ----
+  (function(){
+    const wm = document.getElementById('watermark');
+    const label = CLIENT_IP + ' · ' + new Date().toLocaleString('vi-VN');
+    for (let r = 0; r < 10; r++){
+      for (let c = 0; c < 4; c++){
+        const s = document.createElement('span');
+        s.textContent = label;
+        s.style.top = (r*11) + '%';
+        s.style.left = (c*30 - 10) + '%';
+        wm.appendChild(s);
+      }
+    }
+  })();
+
+  // ---- chặn chuột phải / bôi đen / kéo thả (trừ ô tự luận) ----
+  document.addEventListener('contextmenu', e => e.preventDefault());
+  document.addEventListener('selectstart', e => { if (e.target.tagName !== 'TEXTAREA') e.preventDefault(); });
+  document.addEventListener('dragstart', e => e.preventDefault());
+  document.addEventListener('keydown', function(e){
+    const k = e.key.toLowerCase();
+    if (e.key === 'F12') e.preventDefault();
+    if (e.ctrlKey && e.shiftKey && (k === 'i' || k === 'j' || k === 'c')) e.preventDefault();
+    if (e.ctrlKey && (k === 'u' || k === 's' || k === 'p')) e.preventDefault();
+  });
+
+  let examStarted = false;
+  let camStream = null;
+
+  function blurPage(){ if (examStarted) document.body.classList.add('blurred'); }
+  function unblurPage(){ document.body.classList.remove('blurred'); }
+  document.addEventListener('visibilitychange', () => { if (document.hidden) blurPage(); else unblurPage(); });
+  window.addEventListener('blur', blurPage);
+  window.addEventListener('focus', unblurPage);
+
+  // ---- khoá thao tác khi thoát fullscreen ----
+  const fsLock = document.getElementById('fs-lock');
+  function isFullscreen(){
+    return !!(document.fullscreenElement || document.webkitFullscreenElement);
+  }
+  function requestFS(){
+    const el = document.documentElement;
+    const req = el.requestFullscreen || el.webkitRequestFullscreen;
+    if (req) return req.call(el);
+    return Promise.reject('no-fullscreen-api');
+  }
+  function onFsChange(){
+    if (!examStarted) return;
+    if (!isFullscreen()){
+      fsLock.style.display = 'flex';
+      fetch(VIOLATION_URL, {method:'POST'}).catch(()=>{});
+    } else {
+      fsLock.style.display = 'none';
+    }
+  }
+  document.addEventListener('fullscreenchange', onFsChange);
+  document.addEventListener('webkitfullscreenchange', onFsChange);
+  document.getElementById('refs-btn').addEventListener('click', () => requestFS().catch(()=>{}));
+
+  // ---- chụp ảnh ngẫu nhiên từ camera, không quay video ----
+  function scheduleSnapshot(video, canvas){
+    const delay = 15000 + Math.random() * 30000; // 15s - 45s, ngẫu nhiên
+    setTimeout(() => {
+      if (!examStarted || !camStream) return;
+      try{
+        canvas.width = 320; canvas.height = 240;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(video, 0, 0, 320, 240);
+        const dataUrl = canvas.toDataURL('image/jpeg', 0.5);
+        fetch(SNAPSHOT_URL, {
+          method: 'POST', headers: {'Content-Type':'application/json'},
+          body: JSON.stringify({image: dataUrl})
+        }).catch(()=>{});
+      }catch(e){}
+      scheduleSnapshot(video, canvas);
+    }, delay);
+  }
+
+  // ---- nút Bắt đầu: xin fullscreen + camera, rồi mở đề ----
+  document.getElementById('start-btn').addEventListener('click', async function(){
+    const btn = this;
+    const status = document.getElementById('gate-status');
+    btn.disabled = true;
+    status.style.color = 'var(--muted)';
+    status.textContent = 'Đang khởi tạo...';
+    try {
+      await requestFS();
+    } catch(e) {
+      status.style.color = '#e0433d';
+      status.textContent = 'Trình duyệt của bạn không hỗ trợ / từ chối chế độ toàn màn hình. Vui lòng thử trình duyệt khác.';
+      btn.disabled = false;
+      return;
+    }
+    try {
+      camStream = await navigator.mediaDevices.getUserMedia({video:true, audio:false});
+    } catch(e) {
+      status.style.color = '#e0433d';
+      status.textContent = 'Bạn cần cấp quyền camera để bắt đầu làm bài.';
+      btn.disabled = false;
+      return;
+    }
+    const video = document.getElementById('cam-preview');
+    video.style.display = 'block';
+    video.srcObject = camStream;
+    const canvas = document.createElement('canvas');
+
+    try {
+      const r = await fetch(START_URL, {method:'POST'});
+      const j = await r.json();
+      if (!j.ok){
+        status.style.color = '#e0433d';
+        status.textContent = 'Không thể bắt đầu (có thể IP này đã nộp bài rồi).';
+        btn.disabled = false;
+        return;
+      }
+    } catch(e){
+      status.style.color = '#e0433d';
+      status.textContent = 'Lỗi kết nối máy chủ, thử lại.';
+      btn.disabled = false;
+      return;
+    }
+
+    examStarted = true;
+    document.getElementById('gate').style.display = 'none';
+    document.getElementById('exam').style.display = 'block';
+    scheduleSnapshot(video, canvas);
+    // chụp một tấm sớm để chắc chắn có ảnh ngay từ đầu
+    setTimeout(() => {
+      try{
+        canvas.width = 320; canvas.height = 240;
+        canvas.getContext('2d').drawImage(video, 0, 0, 320, 240);
+        fetch(SNAPSHOT_URL, {method:'POST', headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({image: canvas.toDataURL('image/jpeg', 0.5)})}).catch(()=>{});
+      }catch(e){}
+    }, 4000);
+  });
+
+  // dừng camera khi nộp bài
+  document.getElementById('exam').addEventListener('submit', function(){
+    examStarted = false;
+    if (camStream) camStream.getTracks().forEach(t => t.stop());
+  });
+
+  // ---- nút admin ẩn -> bảng xem nhanh ngay trong trang ----
+  const adminPanel = document.getElementById('admin-panel');
+  const adminBody = document.getElementById('admin-body');
+  document.getElementById('admin-close').addEventListener('click', () => adminPanel.style.display = 'none');
+
+  document.getElementById('admin-trigger').addEventListener('click', async function(){
+    const code = prompt('Nhập mã bảo mật:');
+    if (code === null) return;
+    adminPanel.style.display = 'flex';
+    adminBody.innerHTML = 'Đang tải...';
+    try {
+      const r = await fetch(ADMIN_SUBMISSIONS_URL, {headers: {'X-Admin-Code': code}});
+      if (r.status === 403){
+        adminBody.innerHTML = '<div class="empty">Sai mã bảo mật.</div>';
+        return;
+      }
+      const j = await r.json();
+      renderAdminList(j.submissions, code);
+    } catch(e){
+      adminBody.innerHTML = '<div class="empty">Lỗi kết nối máy chủ.</div>';
+    }
+  });
+
+  function renderAdminList(subs, code){
+    if (!subs.length){
+      adminBody.innerHTML = '<div class="empty">Chưa có ai nộp bài.</div>';
+      return;
+    }
+    let html = '<table><tr><th>IP</th><th>Nộp lúc</th><th>Trạng thái</th><th>Điểm</th><th>Ảnh</th><th>Thoát FS</th><th></th></tr>';
+    subs.forEach(s => {
+      html += `<tr>
+        <td>${s.ip}</td>
+        <td>${s.submitted_at}</td>
+        <td>${s.graded ? '<span class="badge b-graded">Đã chấm</span>' : '<span class="badge b-pending">Chưa chấm</span>'}</td>
+        <td>${s.graded ? s.total_score + '/15' : '—'}</td>
+        <td><span class="link-btn" onclick="showSnaps('${s.ip}','${code}')">${s.snapshot_count} ảnh</span></td>
+        <td>${s.fullscreen_exits}</td>
+        <td><span class="link-btn" onclick="gotoGrade('${s.ip}','${code}')">Chấm bài →</span></td>
+      </tr>
+      <tr id="snaps-${s.ip}" style="display:none;"><td colspan="7"><div class="snap-thumbs"></div></td></tr>`;
+    });
+    html += '</table>';
+    adminBody.innerHTML = html;
+  }
+
+  window.showSnaps = async function(ip, code){
+    const row = document.getElementById('snaps-' + ip);
+    if (row.style.display === 'table-row'){ row.style.display = 'none'; return; }
+    row.style.display = 'table-row';
+    const holder = row.querySelector('.snap-thumbs');
+    holder.textContent = 'Đang tải ảnh...';
+    try {
+      const url = ADMIN_SNAPSHOTS_BASE.replace('__IP__', ip);
+      const r = await fetch(url, {headers: {'X-Admin-Code': code}});
+      const j = await r.json();
+      holder.innerHTML = '';
+      (j.snapshots || []).forEach(s => {
+        const img = document.createElement('img');
+        img.src = s.image;
+        img.title = s.time;
+        holder.appendChild(img);
+      });
+      if (!j.snapshots || !j.snapshots.length) holder.textContent = 'Không có ảnh.';
+    } catch(e){
+      holder.textContent = 'Lỗi tải ảnh.';
+    }
+  };
+
+  window.gotoGrade = function(ip, code){
+    const f = document.createElement('form');
+    f.method = 'POST'; f.action = ADMIN_LOGIN_URL;
+    const i1 = document.createElement('input'); i1.type='hidden'; i1.name='code'; i1.value=code;
+    const i2 = document.createElement('input'); i2.type='hidden'; i2.name='next';
+    i2.value = ADMIN_GRADE_BASE.replace('__IP__', ip);
+    f.appendChild(i1); f.appendChild(i2);
+    document.body.appendChild(f);
+    f.submit();
+  };
+</script>
+</body>
+</html>
