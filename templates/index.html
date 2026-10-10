@@ -3,6 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="referrer" content="same-origin">
 <title>C0C0 GPT</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -76,6 +77,8 @@ main>*:not(#bg){position:relative;z-index:1}
 #top{display:flex;align-items:center;gap:8px;padding:10px 16px;font-weight:600;min-height:52px}
 #top #title{flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ico{width:36px;height:36px;border-radius:10px;font-size:17px}.ico:hover{background:var(--hover)}
+#endBtn{width:auto;padding:0 12px;font-size:13px;color:var(--red);border:1px solid var(--red)}
+#endBtn:hover{background:var(--red);color:#fff}
 #menu{display:none}
 #msgs{flex:1;overflow:auto;padding:8px 0 20px;scroll-behavior:smooth}
 main.empty{justify-content:center}
@@ -105,6 +108,9 @@ pre{background:#0f1115;color:#e8e8e8;padding:12px 14px;border-radius:12px;overfl
 .typing i{width:8px;height:8px;border-radius:50%;background:var(--acc);animation:b 1.2s infinite}
 .typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
 @keyframes b{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-5px)}}
+.endnote{margin:0 auto;text-align:center;background:#fff4f4;border:1px solid #f5c6c8;color:#a1262a;border-radius:16px;padding:12px 20px;animation:pop .35s}
+.endnote .meta{justify-content:center;color:inherit;opacity:.8}
+[data-theme=dark] .endnote{background:#3a1d20;border-color:#5b2a2e;color:#ffb4b7}
 #down{position:absolute!important;right:24px;bottom:130px;width:38px;height:38px;border-radius:50%;background:var(--card);border:1px solid var(--line);box-shadow:var(--shadow);z-index:3!important;animation:pop .25s}
 #comp{max-width:780px;width:100%;margin:0 auto;padding:0 20px 18px}
 #banner{background:#fff4f4;border:1px solid #f5c6c8;color:#a1262a;border-radius:12px;padding:8px 14px;margin-bottom:8px;font-size:14px;animation:rise .3s}
@@ -168,7 +174,7 @@ main.hasbg .foot,main.hasbg .hero h2{background:var(--glass);backdrop-filter:blu
   <aside id="side">
     <div class="brand"><div class="mark">C0</div>C0C0 GPT</div>
     <div class="nav"><button id="newChat">✎ <span>Trò chuyện mới</span></button></div>
-    <input id="search" placeholder="Tìm đoạn chat…">
+    <input id="search" placeholder="Tìm đoạn chat…" autocomplete="off">
     <div class="sec" id="secTitle">Gần đây</div>
     <div id="list"></div>
     <div class="me"><div class="av" id="av"></div><div class="n"><div id="meName"></div><small id="meRole"></small></div><button id="logout">Đăng xuất</button></div>
@@ -177,6 +183,7 @@ main.hasbg .foot,main.hasbg .hero h2{background:var(--glass);backdrop-filter:blu
     <div id="bg"></div>
     <div id="top">
       <button id="menu" class="ico" title="Menu">☰</button><span id="title">C0C0 GPT</span>
+      <button id="endBtn" class="ico" title="Ngắt kết nối với người dùng" hidden>⛔ Ngắt kết nối</button>
       <button id="bgBtn" class="ico" title="Đổi nền đoạn chat">🖼</button>
       <button id="themeBtn" class="ico" title="Sáng / tối">🌙</button>
     </div>
@@ -199,8 +206,10 @@ main.hasbg .foot,main.hasbg .hero h2{background:var(--glass);backdrop-filter:blu
 
 <script>
 const $ = s => document.querySelector(s);
+const END = '[[C0C0:END]]';                                  // tin nhắn đặc biệt của admin = ngắt kết nối
 let me = null, active = null, pending = false, waitBase = 0, waitAt = 0, sig = '', file = null, mode = 'login';
-let seen = new Set(), curBg = null, chatsCache = [], lastPending = -1, bgPick = null, bgFile = null;
+let seen = new Set(), curBg = null, chatsCache = [], lastPending = -1, bgPick = null, bgFile = null, bgOrig = null;
+let epoch = 0, endTimer = null, endCd = null;               // epoch: mỗi lần đổi phiên +1, bỏ qua mọi phản hồi cũ
 
 const PRESETS = {
   aurora:'linear-gradient(135deg,#0f2027,#2c5364,#12a37f,#6dd5ed)',
@@ -213,21 +222,39 @@ const PRESETS = {
 const NAMES = {aurora:'Cực quang',sunset:'Hoàng hôn',ocean:'Đại dương',forest:'Rừng xanh',night:'Đêm sao',sakura:'Hoa anh đào'};
 
 async function api(url, opt = {}) {
-  const r = await fetch(url, opt); let d = {};
+  const r = await fetch(url, {credentials: 'same-origin', cache: 'no-store', ...opt}); let d = {};
   try { d = await r.json(); } catch (e) {}
+  if (r.status === 401 && me && !/^\/api\/(me|login|register)$/.test(url)) { boot(); }   // phiên hết hạn -> xóa sạch
   if (!r.ok) throw new Error(d.error || 'Có lỗi xảy ra');
   return d;
 }
 const jpost = (u, b) => api(u, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(b || {})});
-const esc = s => String(s).replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const esc = s => String(s).replace(/[&<>"']/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'}[c]));
 const tokens = sec => Math.floor(sec * 10 / 2);          // (số giây x 10) / 2
 const elapsed = () => waitBase + (Date.now() - waitAt) / 1000;
 const hhmm = t => { if (!t) return ''; const d = new Date(t); return isNaN(d) ? '' : d.toLocaleTimeString('vi-VN', {hour: '2-digit', minute: '2-digit'}); };
+const isEnd = m => m.role !== 'user' && String(m.content || '').trim() === END;
 
 function fmt(text) {
   return text.split('```').map((p, i) => i % 2
     ? '<pre>' + esc(p.replace(/^\w*\n/, '')) + '</pre>'
     : '<span class="txt">' + esc(p) + '</span>').join('');
+}
+
+/* ---------- xóa sạch dữ liệu phiên (chống rò rỉ giữa các tài khoản) ---------- */
+function wipe() {
+  epoch++;
+  active = null; sig = ''; pending = false; chatsCache = []; seen = new Set(); curBg = null; lastPending = -1;
+  file = null; bgPick = null; bgFile = null; bgOrig = null;
+  clearTimeout(endTimer); clearInterval(endCd); endTimer = endCd = null;
+  $('#msgs').innerHTML = ''; $('#msgs').dataset.cid = ''; $('#list').innerHTML = '';
+  $('#search').value = ''; $('#input').value = ''; $('#file').value = '';
+  $('#prev').hidden = true; $('#prev').innerHTML = ''; $('#banner').hidden = true; $('#endBtn').hidden = true;
+  $('#title').textContent = 'C0C0 GPT'; document.title = 'C0C0 GPT';
+  $('#bg').className = ''; $('#bg').style.backgroundImage = ''; $('#main').classList.remove('hasbg');
+  $('#side').classList.remove('open');
+  $('#meName').textContent = $('#meRole').textContent = $('#av').textContent = '';
+  document.querySelectorAll('.modal,#lb,#drop').forEach(x => x.remove());
 }
 
 /* ---------- theme ---------- */
@@ -248,10 +275,18 @@ $('#authForm').onsubmit = async e => {
   try { await jpost('/api/' + mode, {username: $('#u').value, password: $('#p').value}); $('#p').value = ''; boot(); }
   catch (err) { $('#authErr').textContent = err.message; }
 };
-$('#logout').onclick = async () => { await jpost('/api/logout'); active = null; boot(); };
+$('#logout').onclick = async () => {
+  wipe(); $('#app').hidden = true;                          // ẩn + xóa dữ liệu ngay, không đợi server
+  try { await jpost('/api/logout'); } catch (e) {}
+  me = null; $('#u').value = ''; $('#p').value = ''; boot();
+};
 
 async function boot() {
-  try { me = (await api('/api/me')).user; } catch (e) { me = null; }
+  wipe(); me = null; $('#app').hidden = true; $('#auth').hidden = true;
+  const ep = epoch; let u = null;
+  try { u = (await api('/api/me')).user; } catch (e) {}
+  if (ep !== epoch) return;
+  me = u || null;
   $('#auth').hidden = !!me; $('#app').hidden = !me;
   if (!me) return;
   $('#meName').textContent = me.username; $('#av').textContent = me.username.slice(0, 2).toUpperCase();
@@ -259,8 +294,9 @@ async function boot() {
   $('#newChat').hidden = me.is_admin; $('#bgBtn').hidden = me.is_admin;
   $('#secTitle').textContent = me.is_admin ? 'Hộp thư đến' : 'Gần đây';
   $('#foot').textContent = me.is_admin ? 'Bạn đang trả lời với tư cách C0C0 GPT' : 'C0C0 GPT có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.';
-  active = null; sig = ''; lastPending = -1; renderEmpty(); refreshList();
+  renderEmpty(); refreshList();
 }
+addEventListener('pageshow', e => { if (e.persisted) boot(); });   // quay lại bằng nút Back: không dùng trang cache
 
 /* ---------- nền đoạn chat ---------- */
 function bgCss(bg) {
@@ -277,7 +313,7 @@ function applyBg(bg) {
   $('#main').classList.toggle('hasbg', !!css);
 }
 function openBgPicker() {
-  bgPick = curBg || ''; bgFile = null;
+  bgPick = curBg || ''; bgFile = null; bgOrig = curBg || '';
   const m = document.createElement('div'); m.className = 'modal'; m.id = 'bgModal';
   m.innerHTML = `<div class="sheet"><h3>Nền đoạn chat</h3><p>Trang trí đoạn chat trong lúc chờ. C0C0 GPT cũng sẽ thấy nền này khi trả lời bạn.</p>
     <div class="grid">${Object.keys(PRESETS).map(k => `<button class="sw ${bgPick === 'preset:' + k ? 'sel' : ''}" data-k="${k}" style="background:${PRESETS[k]}">${NAMES[k]}</button>`).join('')}</div>
@@ -285,7 +321,7 @@ function openBgPicker() {
     <div class="acts"><button id="bgCancel">Hủy</button><button class="pri" id="bgSave">Lưu nền</button></div></div>`;
   document.body.appendChild(m);
   m.onclick = e => {
-    if (e.target === m || e.target.id === 'bgCancel') return m.remove();
+    if (e.target === m || e.target.id === 'bgCancel') return closeBg();
     const sw = e.target.closest('.sw');
     if (sw) { bgPick = 'preset:' + sw.dataset.k; bgFile = null; m.querySelectorAll('.sw').forEach(x => x.classList.toggle('sel', x === sw)); applyPreview(); }
     if (e.target.id === 'bgNone') { bgPick = ''; bgFile = null; m.querySelectorAll('.sw').forEach(x => x.classList.remove('sel')); applyPreview(); }
@@ -293,15 +329,18 @@ function openBgPicker() {
     if (e.target.id === 'bgSave') saveBg();
   };
 }
-function applyPreview() { const keep = curBg; curBg = null; applyBg(bgFile ? URL.createObjectURL(bgFile) : bgPick); window._prevBg = keep; }
+function closeBg() { const m = $('#bgModal'); if (!m) return; m.remove(); curBg = null; applyBg(bgOrig); }   // hủy -> trả về nền cũ
+function applyPreview() { curBg = null; applyBg(bgFile ? URL.createObjectURL(bgFile) : bgPick); }
 $('#bgFile').onchange = e => { const f = e.target.files[0]; e.target.value = ''; if (!f || !$('#bgModal')) return; bgFile = f; bgPick = null; $('#bgModal').querySelectorAll('.sw').forEach(x => x.classList.remove('sel')); applyPreview(); };
 async function saveBg() {
+  const ep = epoch;
   try {
     if (!active) active = (await jpost('/api/chats')).id;
     const fd = new FormData();
     if (bgFile) fd.append('image', bgFile); else fd.append('bg', bgPick || '');
     const d = await api(`/api/chats/${active}/background`, {method: 'POST', body: fd});
-    curBg = null; applyBg(d.bg || ''); $('#bgModal').remove(); sig = ''; await loadChat(); refreshList();
+    if (ep !== epoch) return;
+    curBg = null; applyBg(d.bg || ''); $('#bgModal')?.remove(); sig = ''; await loadChat(); refreshList();
   } catch (e) { alert(e.message); }
 }
 $('#bgBtn').onclick = openBgPicker;
@@ -312,12 +351,14 @@ function ping() {                                           // âm báo cho admi
     o.connect(g); g.connect(c.destination); o.frequency.value = 880; g.gain.setValueAtTime(.15, c.currentTime);
     g.gain.exponentialRampToValueAtTime(.001, c.currentTime + .4); o.start(); o.stop(c.currentTime + .4); } catch (e) {}
 }
+const pv = c => String(c.preview || '').includes(END) ? '⛔ Đã ngắt kết nối' : (c.preview || '');
 function drawList() {
+  if (!me) return;
   const q = $('#search').value.trim().toLowerCase();
-  const rows = chatsCache.filter(c => !q || (c.username || '').toLowerCase().includes(q) || (c.title || '').toLowerCase().includes(q) || (c.preview || '').toLowerCase().includes(q));
+  const rows = chatsCache.filter(c => !q || (c.username || '').toLowerCase().includes(q) || (c.title || '').toLowerCase().includes(q) || pv(c).toLowerCase().includes(q));
   $('#list').innerHTML = rows.map((c, i) => me.is_admin ? `
     <button class="item ${c.id === active ? 'on' : ''}" data-id="${c.id}" style="animation-delay:${i * 30}ms">
-      <div class="t"><b>${esc(c.username)}</b><small>${esc(c.preview || '')}</small></div>
+      <div class="t"><b>${esc(c.username)}</b><small>${esc(pv(c))}</small></div>
       ${c.pending ? `<span class="badge">đang chờ</span>` : ''}
     </button>` : `
     <button class="item ${c.id === active ? 'on' : ''}" data-id="${c.id}" style="animation-delay:${i * 30}ms">
@@ -328,15 +369,17 @@ function drawList() {
 }
 async function refreshList() {
   if (!me) return;
+  const ep = epoch;
   try {
     const d = await api(me.is_admin ? '/api/admin/inbox' : '/api/chats');
+    if (ep !== epoch || !me) return;                        // phản hồi của phiên cũ -> bỏ
     chatsCache = d.chats;
     if (me.is_admin) {
       const n = d.chats.filter(c => c.pending).length;
       if (lastPending >= 0 && n > lastPending) ping();
       lastPending = n; document.title = n ? `(${n}) C0C0 GPT` : 'C0C0 GPT';
     }
-    if (document.activeElement !== $('#search') || !$('#search').value) drawList(); else drawList();
+    drawList();
   } catch (e) {}
 }
 $('#search').oninput = drawList;
@@ -361,7 +404,7 @@ function heroHtml() {
   return `<div class="hero"><div class="mark">C0</div><h2>Chúng ta nên bắt đầu từ đâu?</h2><div class="chips">${tips.map(t => `<button data-tip="${esc(t)}">${esc(t)}</button>`).join('')}</div></div>`;
 }
 function renderEmpty() {
-  $('#main').classList.add('empty'); pending = false; $('#banner').hidden = true; $('#title').textContent = 'C0C0 GPT';
+  $('#main').classList.add('empty'); pending = false; $('#banner').hidden = true; $('#endBtn').hidden = true; $('#title').textContent = 'C0C0 GPT';
   $('#msgs').innerHTML = heroHtml(); $('#msgs').dataset.cid = ''; seen = new Set(); applyBg('');
   $('#input').disabled = $('#snd').disabled = $('#plus').disabled = !!(me && me.is_admin);
 }
@@ -373,13 +416,15 @@ $('#msgs').addEventListener('click', e => {
   const z = e.target.closest('.pic'); if (z) { e.preventDefault(); zoom(z.src); }
 });
 function zoom(src) { const d = document.createElement('div'); d.id = 'lb'; d.innerHTML = `<img src="${esc(src)}">`; d.onclick = () => d.remove(); document.body.appendChild(d); }
-document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#lb')?.remove(); $('#bgModal')?.remove(); } });
+document.addEventListener('keydown', e => { if (e.key === 'Escape') { $('#lb')?.remove(); closeBg(); } });
 
 function openChat(id) { active = id; sig = ''; seen = new Set(); curBg = null; loadChat(); refreshList(); $('#side').classList.remove('open'); }
 
 async function loadChat() {
-  if (!active) return;
-  let d; try { d = await api('/api/chats/' + active); } catch (e) { active = null; renderEmpty(); return; }
+  if (!active || !me) return;
+  const id = active, ep = epoch;
+  let d; try { d = await api('/api/chats/' + id); } catch (e) { if (ep === epoch && active === id) { active = null; renderEmpty(); } return; }
+  if (ep !== epoch || active !== id) return;                // đã đổi chat / đổi tài khoản -> bỏ
   pending = d.waiting; waitBase = d.wait_seconds; waitAt = Date.now();
   applyBg(d.chat.bg);
   const s = d.messages.map(m => m.id).join(',') + '|' + d.waiting;
@@ -388,24 +433,46 @@ async function loadChat() {
 }
 function renderMsgs(d) {
   const box = $('#msgs'), near = box.scrollHeight - box.scrollTop - box.clientHeight < 120 || !box.dataset.cid || box.dataset.cid != active;
-  const first = seen.size === 0;
+  const first = seen.size === 0, ended = d.messages.some(isEnd);
   $('#main').classList.toggle('empty', d.messages.length === 0 && !me.is_admin);
   $('#title').textContent = me.is_admin ? d.chat.username + ' · ' + d.chat.title : d.chat.title;
-  $('#input').disabled = $('#snd').disabled = $('#plus').disabled = false;
+  $('#input').disabled = $('#snd').disabled = $('#plus').disabled = ended;
+  $('#endBtn').hidden = !(me.is_admin && !ended);
   let h = d.messages.map(m => {
     const cls = (!first && !seen.has(m.id)) ? ' new' : '';
+    if (isEnd(m)) return me.is_admin
+      ? `<div class="row${cls}"><div class="endnote"><b>Bạn đã ngắt kết nối với người dùng.</b><div class="meta">Đoạn chat sẽ bị xóa khi người dùng thấy thông báo.</div></div></div>`
+      : `<div class="row${cls}"><div class="endnote"><b>Bạn đã hết hạn token.</b><br>Hãy tạo đoạn chat mới.<div class="meta">Đoạn chat sẽ tự xóa sau <span id="cd">3</span>s</div></div></div>`;
     const img = m.image ? `<img class="pic" src="${esc(m.image)}">` : '';
     const tm = hhmm(m.created_at || m.time);
     if (m.role === 'user') return `<div class="row u${cls}"><div class="bub">${img}${m.content ? fmt(m.content) : ''}${tm ? `<div class="meta">${tm}</div>` : ''}</div></div>`;
     return `<div class="row a${cls}"><div class="logo">C0</div><div class="body">${img}${fmt(m.content || '')}<div class="meta">${tm}${m.tokens ? `<span>${m.tokens} token</span>` : ''}<button class="cp" data-copy>⧉ Chép</button></div></div></div>`;
   }).join('');
   d.messages.forEach(m => seen.add(m.id));
-  if (d.waiting && !me.is_admin)
+  if (d.waiting && !me.is_admin && !ended)
     h += `<div class="row a${first ? '' : ' new'}"><div class="logo">C0</div><div class="body"><div class="typing"><i></i><i></i><i></i></div><div class="meta">Đang tạo câu trả lời · <span id="tok">0</span> token</div></div></div>`;
   if (d.messages.length === 0 && !me.is_admin) h = heroHtml();
   box.innerHTML = h; box.dataset.cid = active;
   if (near) box.scrollTop = box.scrollHeight;
+  if (ended && !me.is_admin && !endTimer) scheduleDelete(active);
 }
+function scheduleDelete(id) {                               // người dùng: 3 giây sau thông báo -> tự xóa chat
+  const ep = epoch; let left = 3;
+  endCd = setInterval(() => { left = Math.max(0, left - 1); const c = $('#cd'); if (c) c.textContent = left; }, 1000);
+  endTimer = setTimeout(async () => {
+    clearInterval(endCd); endTimer = endCd = null;
+    try { await api('/api/chats/' + id, {method: 'DELETE'}); } catch (e) {}
+    if (ep !== epoch) return;
+    if (active === id) { active = null; sig = ''; renderEmpty(); }
+    refreshList();
+  }, 3000);
+}
+$('#endBtn').onclick = async () => {                        // admin: ngắt kết nối
+  if (!active || !confirm('Ngắt kết nối với người dùng này?\nHọ sẽ thấy "hết hạn token" và đoạn chat tự xóa sau 3 giây.')) return;
+  const fd = new FormData(); fd.append('text', END);
+  try { await api(`/api/admin/chats/${active}/reply`, {method: 'POST', body: fd}); sig = ''; await loadChat(); refreshList(); }
+  catch (e) { alert(e.message); }
+};
 function tick() {
   const t = $('#tok'); if (t) t.textContent = tokens(elapsed());
   const b = $('#banner');
@@ -414,15 +481,16 @@ function tick() {
   } else b.hidden = true;
 }
 setInterval(tick, 1000);
-setInterval(() => { refreshList(); loadChat(); }, 2500);
+setInterval(() => { if (me) { refreshList(); loadChat(); } }, 2500);
 $('#msgs').onscroll = () => { const b = $('#msgs'); $('#down').hidden = b.scrollHeight - b.scrollTop - b.clientHeight < 200; };
 $('#down').onclick = () => { const b = $('#msgs'); b.scrollTop = b.scrollHeight; };
 
 /* ---------- gửi ---------- */
 async function send() {
   const ta = $('#input'), text = ta.value.trim();
-  if (!text && !file) return;
+  if ((!text && !file) || ta.disabled || !me) return;
   const fd = new FormData(); fd.append('text', text); if (file) fd.append('image', file);
+  const ep = epoch;
   $('#snd').disabled = true;
   try {
     if (me.is_admin) { if (!active) return; await api(`/api/admin/chats/${active}/reply`, {method: 'POST', body: fd}); }
@@ -430,9 +498,10 @@ async function send() {
       if (!active) active = (await jpost('/api/chats')).id;
       await api(`/api/chats/${active}/send`, {method: 'POST', body: fd});
     }
+    if (ep !== epoch) return;
     ta.value = ''; clearFile(); size(); sig = ''; await loadChat(); refreshList();
   } catch (e) { alert(e.message); }
-  $('#snd').disabled = false;
+  if (ep === epoch) $('#snd').disabled = !!$('#input').disabled;
 }
 $('#snd').onclick = send;
 $('#input').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
@@ -448,12 +517,12 @@ function setFile(f) {
 $('#file').onchange = e => setFile(e.target.files[0]);
 function clearFile() { file = null; $('#file').value = ''; $('#prev').hidden = true; $('#prev').innerHTML = ''; }
 // dán ảnh (Ctrl+V) và kéo thả ảnh vào khung chat
-document.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])][0]; if (f && !$('#input').disabled) setFile(f); });
+document.addEventListener('paste', e => { const f = [...(e.clipboardData?.files || [])][0]; if (f && me && !$('#input').disabled) setFile(f); });
 let dragN = 0;
 addEventListener('dragenter', e => { if (!me || $('#input').disabled) return; e.preventDefault(); if (++dragN === 1) { const d = document.createElement('div'); d.id = 'drop'; d.textContent = 'Thả ảnh để gửi'; document.body.appendChild(d); } });
 addEventListener('dragleave', () => { if (--dragN <= 0) { dragN = 0; $('#drop')?.remove(); } });
 addEventListener('dragover', e => e.preventDefault());
-addEventListener('drop', e => { e.preventDefault(); dragN = 0; $('#drop')?.remove(); if (!$('#input').disabled) setFile(e.dataTransfer.files[0]); });
+addEventListener('drop', e => { e.preventDefault(); dragN = 0; $('#drop')?.remove(); if (me && !$('#input').disabled) setFile(e.dataTransfer.files[0]); });
 
 boot();
 </script>
