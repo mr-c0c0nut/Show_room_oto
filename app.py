@@ -303,7 +303,12 @@ def healthz():
 @app.route("/")
 def index():
     nonce = secrets.token_urlsafe(16)
-    with open(os.path.join(BASE, "index.html"), encoding="utf-8") as f:
+    path = next((p for p in (os.path.join(BASE, "index.html"), os.path.join(BASE, "templates", "index.html"))
+                 if os.path.exists(p)), None)
+    if not path:
+        logging.error("Không tìm thấy index.html trong %s", BASE)
+        return "Thiếu file index.html: hãy để index.html cùng thư mục với app.py rồi deploy lại.", 500
+    with open(path, encoding="utf-8") as f:
         html = f.read().replace("<script>", f'<script nonce="{nonce}">').replace("<style>", f'<style nonce="{nonce}">')
     resp = make_response(html)
     resp.headers["Content-Type"] = "text/html; charset=utf-8"
