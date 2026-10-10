@@ -2,646 +2,279 @@
 <html lang="vi">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Long Biên Ford — Đại lý ủy quyền Ford Việt Nam</title>
-<meta name="description" content="Long Biên Ford — Đại lý ủy quyền Ford Việt Nam, thành lập 7/3/2017. Số 3 Nguyễn Văn Linh, Việt Hưng, Hà Nội.">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%234f8dff'/><text x='32' y='45' font-size='34' font-family='Arial' font-weight='bold' text-anchor='middle' fill='white'>F</text></svg>">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Be+Vietnam+Pro:wght@100;200;300;400;500;600;700;800&display=swap" rel="stylesheet">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>C0C0 GPT</title>
 <style>
-:root{
-  --bg:#04060b;
-  --txt:#f2f5fa;
-  --mut:rgba(242,245,250,.55);
-  --dim:rgba(242,245,250,.30);
-  --acc:#4f8dff;
-  --acc2:#6ee7ff;
-  --stroke:rgba(255,255,255,.09);
-  --glass:linear-gradient(150deg,rgba(255,255,255,.075),rgba(255,255,255,.02));
-}
-*{margin:0;padding:0;box-sizing:border-box}
-html{scroll-behavior:smooth}
-body{background:var(--bg);color:var(--txt);font-family:'Be Vietnam Pro',sans-serif;line-height:1.7;overflow-x:hidden;-webkit-font-smoothing:antialiased}
-body.locked{overflow:hidden;height:100vh}
-::selection{background:rgba(79,141,255,.4)}
-a{color:inherit;text-decoration:none}
-.wrap{max-width:1140px;margin:0 auto;padding:0 24px}
-section{padding:130px 0;scroll-margin-top:70px}
-
-/* ================= INTRO VIDEO ================= */
-#intro{position:fixed;inset:0;z-index:2000;background:#000;display:grid;place-items:center}
-#intro video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;transition:transform 1.2s ease,opacity 1s ease}
-#intro::after{content:"";position:absolute;inset:0;background:
-  radial-gradient(1200px 500px at 50% 110%,rgba(4,6,11,.75),transparent 60%),
-  linear-gradient(180deg,rgba(4,6,11,.55),rgba(4,6,11,.1) 35%,rgba(4,6,11,.15) 65%,rgba(4,6,11,.8));pointer-events:none}
-#intro.done{opacity:0;visibility:hidden;transition:opacity 1s ease,visibility 0s 1s}
-#intro.done video{transform:scale(1.08);opacity:.4}
-
-.intro-brand{position:relative;z-index:3;text-align:center;transition:opacity 1s ease,transform 1s ease;animation:brandIn 1.4s cubic-bezier(.2,.7,.2,1) both}
-@keyframes brandIn{from{opacity:0;transform:translateY(40px);letter-spacing:.6em}to{opacity:1}}
-.intro-brand h2{font-weight:200;font-size:clamp(34px,7vw,86px);text-transform:uppercase;letter-spacing:.18em;line-height:1.1;text-shadow:0 10px 60px rgba(0,0,0,.8)}
-.intro-brand h2 b{font-weight:800;background:linear-gradient(90deg,#8ab6ff,#6ee7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.intro-brand p{font-weight:300;font-size:12px;letter-spacing:.5em;text-transform:uppercase;color:var(--mut);margin-top:14px;text-shadow:0 4px 30px #000}
-#intro.playing .intro-brand{opacity:0;transform:translateY(-30px) scale(.96);pointer-events:none}
-
-.intro-ui{position:absolute;z-index:4;left:0;right:0;bottom:0;padding:26px 28px;display:flex;align-items:center;gap:14px;flex-wrap:wrap;opacity:0;animation:fadeUp 1s 1s ease forwards}
-@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
-.intro-ui .hint{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:rgba(255,255,255,.55);font-weight:300;margin-right:auto;text-shadow:0 2px 20px #000}
-.ibtn{cursor:pointer;font-family:inherit;font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
-  padding:13px 24px;border-radius:999px;border:1px solid rgba(255,255,255,.25);color:#fff;
-  background:rgba(255,255,255,.1);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);
-  transition:transform .3s,background .3s,box-shadow .3s}
-.ibtn:hover{background:rgba(255,255,255,.2);box-shadow:0 0 30px rgba(255,255,255,.2)}
-.ibtn.solid{background:#fff;color:#04060b;border-color:#fff}
-.ibtn.solid:hover{box-shadow:0 0 40px rgba(255,255,255,.5)}
-#vprog{position:absolute;z-index:4;left:0;bottom:0;height:3px;width:0;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 14px rgba(110,231,255,.8)}
-
-/* ===== LỚP NỀN: orbs + hạt bay ngược trọng lực + glow con trỏ ===== */
-.orb{position:fixed;border-radius:50%;filter:blur(100px);pointer-events:none;z-index:-2;will-change:transform}
-#orb1{width:560px;height:560px;top:-140px;right:-120px;background:radial-gradient(circle,rgba(79,141,255,.34),transparent 65%);animation:orbA 26s ease-in-out infinite alternate}
-#orb2{width:480px;height:480px;bottom:-120px;left:-140px;background:radial-gradient(circle,rgba(110,231,255,.20),transparent 65%);animation:orbB 32s ease-in-out infinite alternate}
-#orb3{width:340px;height:340px;top:44%;left:38%;background:radial-gradient(circle,rgba(120,110,255,.16),transparent 65%);animation:orbC 22s ease-in-out infinite alternate}
-@keyframes orbA{to{transform:translate(-90px,110px) scale(1.15)}}
-@keyframes orbB{to{transform:translate(120px,-90px) scale(1.2)}}
-@keyframes orbC{50%{transform:translate(-70px,60px) scale(.85)}}
-#particles{position:fixed;inset:0;pointer-events:none;z-index:-1;overflow:hidden}
-#particles i{position:absolute;bottom:-12px;border-radius:50%;background:#9cc7ff;opacity:0;box-shadow:0 0 8px rgba(150,200,255,.9);animation:rise linear infinite}
-@keyframes rise{0%{transform:translateY(0);opacity:0}10%{opacity:var(--o,.3)}85%{opacity:var(--o,.3)}100%{transform:translateY(-108vh);opacity:0}}
-#glow{position:fixed;top:0;left:0;width:640px;height:640px;border-radius:50%;pointer-events:none;z-index:0;mix-blend-mode:screen;background:radial-gradient(circle,rgba(79,141,255,.09),transparent 62%)}
-body::after{content:"";position:fixed;inset:0;z-index:999;pointer-events:none;opacity:.05;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2'/%3E%3C/filter%3E%3Crect width='120' height='120' filter='url(%23n)' opacity='.6'/%3E%3C/svg%3E")}
-
-/* ===== NAV ===== */
-#prog{position:fixed;top:0;left:0;height:2px;width:0;z-index:300;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 12px rgba(110,231,255,.7)}
-nav{position:fixed;inset:0 0 auto 0;z-index:200;border-bottom:1px solid var(--stroke);background:rgba(4,6,11,.4);backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);transition:background .4s}
-nav.scrolled{background:rgba(4,6,11,.78)}
-.nav-in{max-width:1140px;margin:0 auto;padding:0 24px;height:70px;display:flex;align-items:center;gap:28px;transition:height .4s}
-nav.scrolled .nav-in{height:58px}
-.logo{display:flex;align-items:center;gap:12px;font-weight:600;letter-spacing:.14em;font-size:14px;text-transform:uppercase}
-.logo i{width:32px;height:32px;border-radius:10px;background:var(--glass);border:1px solid var(--stroke);display:grid;place-items:center;font-style:normal;font-weight:800;color:var(--acc2);backdrop-filter:blur(8px)}
-.logo em{font-style:normal;font-weight:200;color:var(--mut)}
-.nav-links{display:flex;gap:26px;margin-left:auto;list-style:none}
-.nav-links a{font-size:12.5px;letter-spacing:.18em;text-transform:uppercase;font-weight:500;color:var(--mut);transition:color .3s,letter-spacing .3s}
-.nav-links a:hover{color:#fff;letter-spacing:.24em}
-.nav-call{font-size:13px;font-weight:600;letter-spacing:.08em;padding:10px 20px;border-radius:999px;background:#fff;color:#04060b;transition:transform .3s,box-shadow .3s}
-.nav-call:hover{box-shadow:0 0 30px rgba(255,255,255,.35)}
-#menuBtn{display:none;margin-left:auto;background:var(--glass);border:1px solid var(--stroke);color:#fff;border-radius:12px;width:44px;height:44px;font-size:20px;cursor:pointer;backdrop-filter:blur(10px)}
-
-/* ===== GLASS ===== */
-.glass{background:var(--glass);border:1px solid var(--stroke);border-radius:22px;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);box-shadow:inset 0 1px 0 rgba(255,255,255,.08),0 24px 60px rgba(0,0,0,.35)}
-
-/* ===== HERO ===== */
-header{position:relative;min-height:100svh;display:flex;flex-direction:column;justify-content:center;padding:140px 0 0}
-.hero-car{position:absolute;right:-3vw;top:24%;width:min(640px,52vw);z-index:-1;opacity:.9;pointer-events:none;will-change:transform}
-.hero-car svg{width:100%;fill:rgba(255,255,255,.055);stroke:rgba(110,231,255,.28);stroke-width:.7;animation:floatY 7s ease-in-out infinite;filter:drop-shadow(0 40px 50px rgba(79,141,255,.22))}
-.car-shadow{position:absolute;right:6vw;top:calc(24% + min(52vw,640px)*.42);width:min(420px,36vw);height:30px;border-radius:50%;background:radial-gradient(ellipse,rgba(79,141,255,.28),transparent 70%);filter:blur(14px);animation:shadowB 7s ease-in-out infinite}
-@keyframes shadowB{0%,100%{transform:scaleX(1);opacity:.7}50%{transform:scaleX(.82);opacity:.4}}
-.eyebrow{display:inline-flex;align-items:center;gap:12px;font-size:12px;font-weight:500;letter-spacing:.4em;text-transform:uppercase;color:var(--acc2);padding:10px 20px;border-radius:999px;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(12px);animation:floatY 5s ease-in-out infinite}
-@keyframes floatY{0%,100%{transform:translateY(0)}50%{transform:translateY(-14px)}}
-h1{font-weight:200;font-size:clamp(58px,10.5vw,150px);line-height:1.02;letter-spacing:-.02em;text-transform:uppercase;margin:34px 0 26px}
-h1 .grad{font-weight:800;background:linear-gradient(90deg,#fff 20%,#8ab6ff 45%,#6ee7ff 70%,#fff 95%);background-size:220% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 6s linear infinite}
-@keyframes shimmer{to{background-position:220% center}}
-.split .ch{display:inline-block;opacity:0;transform:translateY(70px) rotate(5deg);animation:chIn .9s cubic-bezier(.2,.7,.2,1) forwards}
-@keyframes chIn{to{opacity:1;transform:none}}
-.hero-sub{max-width:520px;color:var(--mut);font-weight:300;font-size:17px;opacity:0;animation:fadeUp 1s .8s cubic-bezier(.2,.7,.2,1) forwards}
-.hero-sub b{color:var(--txt);font-weight:600}
-.hero-cta{display:flex;gap:14px;flex-wrap:wrap;margin-top:40px;opacity:0;animation:fadeUp 1s 1s cubic-bezier(.2,.7,.2,1) forwards}
-.btn{display:inline-flex;align-items:center;gap:10px;padding:16px 32px;border-radius:999px;font-size:13px;font-weight:600;letter-spacing:.14em;text-transform:uppercase;transition:transform .35s cubic-bezier(.2,.7,.2,1),box-shadow .35s,background .35s;will-change:transform}
-.btn-solid{background:#fff;color:#04060b}
-.btn-solid:hover{box-shadow:0 0 44px rgba(255,255,255,.35)}
-.btn-ghost{background:var(--glass);border:1px solid var(--stroke);color:var(--txt);backdrop-filter:blur(12px)}
-.btn-ghost:hover{border-color:rgba(110,231,255,.45);box-shadow:0 0 34px rgba(110,231,255,.14)}
-.hero-pills{display:flex;gap:12px;flex-wrap:wrap;margin-top:64px;opacity:0;animation:fadeUp 1s 1.2s cubic-bezier(.2,.7,.2,1) forwards}
-.pill{display:flex;align-items:baseline;gap:8px;padding:14px 22px;border-radius:999px;background:var(--glass);border:1px solid var(--stroke);backdrop-filter:blur(14px);animation:floatY 6s ease-in-out infinite}
-.pill:nth-child(2){animation-delay:.8s}.pill:nth-child(3){animation-delay:1.6s}.pill:nth-child(4){animation-delay:2.4s}
-.pill b{font-size:22px;font-weight:200}
-.pill span{font-size:10.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--dim)}
-.coords{position:absolute;bottom:0;left:0;right:0;border-top:1px solid var(--stroke);padding:16px 0;font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--dim);display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap}
-/* ⏸ chặn animation hero cho tới khi intro kết thúc */
-body:not(.ready) .ch,body:not(.ready) .hero-sub,body:not(.ready) .hero-cta,
-body:not(.ready) .hero-pills,body:not(.ready) .eyebrow{animation-play-state:paused!important}
-
-/* ticker */
-.ticker{overflow:hidden;border-top:1px solid var(--stroke);background:rgba(255,255,255,.02);backdrop-filter:blur(8px)}
-.ticker-track{display:flex;width:max-content;animation:tick 36s linear infinite}
-.ticker-track span{padding:14px 0;white-space:nowrap;font-size:12px;letter-spacing:.34em;text-transform:uppercase;color:var(--dim);font-weight:300}
-@keyframes tick{to{transform:translateX(-50%)}}
-
-/* ===== SECTION HEAD ===== */
-.sec-head{display:flex;align-items:baseline;gap:18px;margin-bottom:56px;flex-wrap:wrap}
-.sec-num{font-weight:200;font-size:14px;letter-spacing:.3em;color:var(--acc2)}
-.sec-title{font-weight:200;font-size:clamp(30px,4.6vw,54px);line-height:1.1;letter-spacing:-.01em}
-.sec-title b{font-weight:700;background:linear-gradient(90deg,#8ab6ff,#6ee7ff);-webkit-background-clip:text;background-clip:text;color:transparent}
-.sec-tag{margin-left:auto;font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--dim)}
-.lead{max-width:600px;color:var(--mut);font-weight:300;margin-bottom:44px}
-.lead b{color:var(--txt);font-weight:600}
-
-/* reveal khi cuộn */
-.reveal{opacity:0;transform:translateY(44px);transition:opacity 1s cubic-bezier(.2,.7,.2,1),transform 1s cubic-bezier(.2,.7,.2,1)}
-.reveal.in{opacity:1;transform:none}
-[data-stagger]>*{opacity:0;transform:translateY(34px);transition:opacity .9s cubic-bezier(.2,.7,.2,1),transform .9s cubic-bezier(.2,.7,.2,1)}
-[data-stagger].in>*{opacity:1;transform:none}
-[data-stagger].in>*:nth-child(1){transition-delay:.05s}[data-stagger].in>*:nth-child(2){transition-delay:.15s}
-[data-stagger].in>*:nth-child(3){transition-delay:.25s}[data-stagger].in>*:nth-child(4){transition-delay:.35s}
-[data-stagger].in>*:nth-child(5){transition-delay:.45s}[data-stagger].in>*:nth-child(6){transition-delay:.55s}
-[data-stagger].in>*:nth-child(7){transition-delay:.65s}[data-stagger].in>*:nth-child(8){transition-delay:.75s}
-
-/* ===== 01 GIỚI THIỆU ===== */
-.about{display:grid;grid-template-columns:1.05fr .95fr;gap:60px;align-items:start}
-.since{margin-top:34px;font-weight:200;font-size:clamp(20px,2.4vw,28px);color:var(--dim);letter-spacing:.1em}
-.since b{color:var(--acc2);font-weight:500}
-.kv{overflow:hidden;position:relative;animation:floatY 8s ease-in-out infinite}
-.kv>div{display:grid;grid-template-columns:150px 1fr;gap:16px;padding:19px 24px;border-bottom:1px solid var(--stroke);transition:background .3s,padding-left .3s}
-.kv>div:hover{background:rgba(255,255,255,.04);padding-left:30px}
-.kv>div:last-child{border-bottom:none}
-.kv dt{font-size:11px;font-weight:600;letter-spacing:.22em;text-transform:uppercase;color:var(--acc2);padding-top:3px}
-.kv dd{font-weight:300;font-size:15px}
-.kv dd a{border-bottom:1px solid transparent;transition:.3s}
-.kv dd a:hover{color:var(--acc2);border-color:var(--acc2)}
-.kv dd small{display:block;color:var(--dim)}
-.badge-float{position:absolute;top:-18px;right:22px;padding:10px 18px;border-radius:999px;background:rgba(79,141,255,.14);border:1px solid rgba(110,231,255,.35);backdrop-filter:blur(10px);font-size:10.5px;letter-spacing:.28em;text-transform:uppercase;color:var(--acc2);animation:floatY 4.5s ease-in-out infinite}
-
-/* ===== 02 DÒNG XE ===== */
-.mgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:18px}
-.mcard{position:relative;padding:30px 26px 26px;overflow:hidden;transition:border-color .4s,box-shadow .4s;will-change:transform}
-.mcard:hover{border-color:rgba(110,231,255,.4);box-shadow:0 30px 70px rgba(0,0,0,.5),0 0 50px rgba(79,141,255,.1)}
-[data-spot]{position:relative}
-[data-spot]::before{content:"";position:absolute;inset:0;border-radius:inherit;background:radial-gradient(260px circle at var(--mx,50%) var(--my,50%),rgba(110,231,255,.11),transparent 62%);opacity:0;transition:opacity .45s;pointer-events:none}
-[data-spot]:hover::before{opacity:1}
-.mcard .idx{position:absolute;top:18px;right:22px;font-weight:200;font-size:12px;letter-spacing:.2em;color:var(--dim)}
-.mcard svg{width:100%;max-height:104px;height:auto;fill:rgba(255,255,255,.09);stroke:rgba(110,231,255,.25);stroke-width:.6;margin:8px 0 18px;animation:floatY 6s ease-in-out infinite;transition:filter .4s}
-.mcard:hover svg{filter:drop-shadow(0 16px 24px rgba(110,231,255,.3))}
-.mgrid .mcard:nth-child(2) svg{animation-delay:.5s}.mgrid .mcard:nth-child(3) svg{animation-delay:1s}
-.mgrid .mcard:nth-child(4) svg{animation-delay:1.5s}.mgrid .mcard:nth-child(5) svg{animation-delay:2s}
-.mgrid .mcard:nth-child(6) svg{animation-delay:2.5s}.mgrid .mcard:nth-child(7) svg{animation-delay:3s}
-.mcard h3{font-weight:500;font-size:18px;letter-spacing:.04em;text-transform:uppercase}
-.mcard p{font-weight:300;font-size:12px;letter-spacing:.2em;text-transform:uppercase;color:var(--mut);margin-top:4px}
-.strip{margin-top:30px;padding:24px 30px;display:flex;gap:20px;align-items:center;justify-content:space-between;flex-wrap:wrap;animation:floatY 9s ease-in-out infinite}
-.strip p{font-weight:300;color:var(--mut)}
-.strip p b{color:var(--txt);font-weight:600}
-
-/* ===== 03 BẢNG GIÁ ===== */
-.prow{padding:22px 6px;border-bottom:1px solid var(--stroke);transition:padding-left .35s,background .35s}
-.prow:hover{padding-left:20px;background:rgba(255,255,255,.025)}
-.prow-top{display:flex;align-items:baseline;gap:18px}
-.pname{font-weight:400;font-size:17px;letter-spacing:.08em;text-transform:uppercase;transition:color .3s}
-.prow:hover .pname{color:var(--acc2)}
-.pval{margin-left:auto;font-weight:200;font-size:29px;color:var(--acc2);white-space:nowrap;text-shadow:0 0 26px rgba(110,231,255,.35)}
-.pval small{font-size:12px;font-weight:500;letter-spacing:.24em;color:var(--dim);margin-left:8px}
-.pbar{height:2px;background:rgba(255,255,255,.07);margin-top:13px;border-radius:99px;overflow:visible}
-.pbar i{display:block;height:100%;width:0;border-radius:99px;background:linear-gradient(90deg,var(--acc),var(--acc2));box-shadow:0 0 14px rgba(110,231,255,.55);position:relative;transition:width 1.5s cubic-bezier(.2,.7,.2,1)}
-.pbar i::after{content:"";position:absolute;right:-4px;top:50%;transform:translateY(-50%);width:8px;height:8px;border-radius:50%;background:#fff;box-shadow:0 0 12px #6ee7ff}
-.note-glass{margin-top:30px;padding:20px 26px;display:flex;gap:16px;align-items:baseline}
-.note-glass b{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:#f0b429;white-space:nowrap}
-.note-glass p{font-weight:300;font-size:14.5px;color:#e6d9ae}
-.compare{margin-top:100px}
-.compare h3{font-weight:200;font-size:clamp(24px,3.4vw,38px);margin-bottom:10px}
-.compare h3 b{font-weight:700;color:var(--acc2)}
-.compare .lead{margin-bottom:30px}
-
-/* ===== 04 DỊCH VỤ ===== */
-.srow{display:grid;grid-template-columns:64px 1fr auto;gap:18px;align-items:center;padding:22px 6px;border-bottom:1px solid var(--stroke);transition:padding-left .35s,background .35s}
-.srow:hover{padding-left:22px;background:rgba(255,255,255,.025)}
-.snum{font-weight:200;font-size:13px;letter-spacing:.2em;color:var(--dim);transition:color .3s}
-.srow:hover .snum{color:var(--acc2)}
-.srow h4{font-weight:400;font-size:18px;letter-spacing:.04em;text-transform:uppercase;transition:color .3s}
-.srow:hover h4{color:var(--acc2)}
-.srow span:last-child{font-size:10px;letter-spacing:.26em;text-transform:uppercase;color:var(--dim);border:1px solid var(--stroke);border-radius:999px;padding:6px 14px;white-space:nowrap}
-.dstats{display:grid;grid-template-columns:repeat(3,1fr);gap:18px;margin-top:60px}
-.dstats>div{padding:38px 30px;text-align:center;animation:floatY 7s ease-in-out infinite}
-.dstats>div:nth-child(2){animation-delay:1.2s}.dstats>div:nth-child(3){animation-delay:2.4s}
-.dstats .n{font-weight:200;font-size:clamp(42px,5vw,64px);line-height:1;color:var(--acc2);text-shadow:0 0 34px rgba(110,231,255,.4)}
-.dstats .l{margin-top:12px;font-size:11px;letter-spacing:.24em;text-transform:uppercase;color:var(--mut);font-weight:400}
-
-/* ===== 05 KHUYẾN MÃI ===== */
-.pcols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
-.pcol{padding:42px 38px;position:relative;overflow:hidden}
-.pcol .status{display:flex;align-items:center;gap:12px;font-size:11px;font-weight:600;letter-spacing:.3em;text-transform:uppercase;color:var(--mut)}
-.dot{width:10px;height:10px;border-radius:50%;background:var(--dim)}
-.pcol.live .dot{background:var(--acc2);box-shadow:0 0 0 0 rgba(110,231,255,.5);animation:pulse 2s infinite}
-@keyframes pulse{70%{box-shadow:0 0 0 12px rgba(110,231,255,0)}100%{box-shadow:0 0 0 0 rgba(110,231,255,0)}}
-.pcol .month{font-weight:200;font-size:clamp(32px,4vw,50px);margin:16px 0 12px}
-.pcol.live{border-color:rgba(110,231,255,.35);box-shadow:inset 0 1px 0 rgba(255,255,255,.1),0 0 60px rgba(79,141,255,.12)}
-.pcol.live .month{color:var(--acc2)}
-.pcol p{font-weight:300;color:var(--mut);max-width:380px}
-.pcol p b{color:var(--txt);font-weight:600}
-.pcol.done{opacity:.55}
-.pnote{margin-top:28px;font-weight:300;color:var(--mut);max-width:640px}
-.pnote b{color:var(--txt);font-weight:600}
-.pnote a{color:var(--acc2);border-bottom:1px solid rgba(110,231,255,.4)}
-
-/* ===== 06 LƯU Ý ===== */
-.nrow{display:grid;grid-template-columns:84px 1fr;gap:24px;padding:30px 6px;border-bottom:1px solid var(--stroke);align-items:baseline;transition:padding-left .35s}
-.nrow:hover{padding-left:20px}
-.nrow:last-child{border-bottom:none}
-.nnum{font-weight:100;font-size:52px;line-height:1;color:transparent;-webkit-text-stroke:1px rgba(110,231,255,.5);transition:.4s}
-.nrow:hover .nnum{color:var(--acc2);-webkit-text-stroke:1px transparent;text-shadow:0 0 30px rgba(110,231,255,.5)}
-.nrow p{font-weight:300;font-size:17px;color:var(--mut);max-width:660px}
-.nrow p b{color:var(--txt);font-weight:600}
-
-/* ===== 07 LIÊN HỆ ===== */
-.contact{display:grid;grid-template-columns:1fr 1fr;gap:56px;align-items:start}
-.ccard{padding:34px 32px;margin-bottom:18px;transition:border-color .4s,box-shadow .4s;will-change:transform}
-.ccard:hover{border-color:rgba(110,231,255,.4);box-shadow:0 30px 70px rgba(0,0,0,.5),0 0 50px rgba(79,141,255,.1)}
-.ccard .l{font-size:11px;letter-spacing:.3em;text-transform:uppercase;color:var(--mut);font-weight:500}
-.ccard .v{display:inline-block;margin-top:10px;font-weight:200;font-size:clamp(30px,3.6vw,46px);color:var(--txt);letter-spacing:.02em;position:relative;transition:color .3s,text-shadow .3s}
-a.v:hover{color:var(--acc2);text-shadow:0 0 30px rgba(110,231,255,.55)}
-.ccard .v::after{content:"";position:absolute;left:0;bottom:-6px;width:100%;height:1px;background:linear-gradient(90deg,var(--acc),var(--acc2));transform:scaleX(0);transform-origin:left;transition:transform .5s cubic-bezier(.2,.7,.2,1)}
-.ccard .v:hover::after{transform:scaleX(1)}
-.ccard .v.small{font-size:clamp(17px,1.8vw,22px);font-weight:300}
-.slogan{margin-top:110px;font-weight:200;font-size:clamp(34px,6.6vw,88px);line-height:1.08;letter-spacing:-.01em;text-transform:uppercase}
-.slogan span{font-weight:800;background:linear-gradient(90deg,#8ab6ff,#6ee7ff,#8ab6ff);background-size:200% auto;-webkit-background-clip:text;background-clip:text;color:transparent;animation:shimmer 5s linear infinite}
-
-footer{border-top:1px solid var(--stroke);padding:34px 0;font-weight:300;font-size:12.5px;color:var(--dim)}
-footer .wrap{display:flex;justify-content:space-between;gap:14px;flex-wrap:wrap}
-
-#top{position:fixed;right:24px;bottom:24px;width:52px;height:52px;border-radius:50%;display:grid;place-items:center;font-size:18px;opacity:0;pointer-events:none;transition:opacity .4s,transform .4s;z-index:150;animation:floatY 4s ease-in-out infinite}
-#top.show{opacity:1;pointer-events:auto}
-
-@media(max-width:960px){
-  section{padding:90px 0}
-  .about,.contact{grid-template-columns:1fr;gap:40px}
-  .pcols{grid-template-columns:1fr}
-  .dstats{grid-template-columns:1fr}
-  .hero-car{opacity:.3;width:70vw;top:auto;bottom:18%}
-  .car-shadow{display:none}
-  .coords span:first-child{display:none}
-}
-@media(max-width:860px){
-  #menuBtn{display:block}
-  .nav-links{display:none;position:absolute;top:100%;left:0;right:0;flex-direction:column;gap:0;padding:10px 24px 20px;background:rgba(4,6,11,.92);backdrop-filter:blur(20px);border-bottom:1px solid var(--stroke)}
-  .nav-links.open{display:flex}
-  .nav-links a{display:block;padding:14px 0;border-bottom:1px solid var(--stroke)}
-  .nav-links li:last-child a{border:none}
-  .nav-call{display:none}
-  .srow{grid-template-columns:44px 1fr}
-  .srow span:last-child{grid-column:2;justify-self:start}
-  .nrow{grid-template-columns:52px 1fr}.nnum{font-size:38px}
-  .kv>div{grid-template-columns:1fr;gap:4px}
-  .intro-ui{padding:20px 16px}
-  .ibtn{padding:11px 18px;font-size:11px}
-}
-@media(prefers-reduced-motion:reduce){
-  *,*::before,*::after{animation:none!important;transition:none!important}
-  .reveal,[data-stagger]>*{opacity:1!important;transform:none!important}
-  .split .ch,.hero-sub,.hero-cta,.hero-pills{opacity:1!important;transform:none!important}
+:root{--bg:#fff;--side:#f9f9f9;--line:#e5e5e5;--txt:#0d0d0d;--mut:#8a8a8a;--hover:#ececec;--acc:#2f7cf6;--red:#e5484d}
+*{box-sizing:border-box}
+html,body{height:100%;margin:0;font:15px/1.55 -apple-system,"Segoe UI",Roboto,sans-serif;color:var(--txt);background:var(--bg)}
+button{font:inherit;cursor:pointer;border:0;background:none;color:inherit}
+[hidden]{display:none!important}
+/* auth */
+#auth{height:100%;display:flex;align-items:center;justify-content:center;background:var(--side)}
+.card{width:360px;max-width:92%;background:#fff;border:1px solid var(--line);border-radius:20px;padding:28px;box-shadow:0 6px 30px rgba(0,0,0,.06)}
+.card h1{margin:0 0 4px;font-size:24px;text-align:center}
+.card p.sub{margin:0 0 18px;text-align:center;color:var(--mut)}
+.tabs{display:flex;background:#f0f0f0;border-radius:12px;padding:3px;margin-bottom:16px}
+.tabs button{flex:1;padding:8px;border-radius:10px;color:var(--mut)}
+.tabs button.on{background:#fff;color:var(--txt);box-shadow:0 1px 3px rgba(0,0,0,.1)}
+.card input{width:100%;padding:11px 14px;margin-bottom:10px;border:1px solid var(--line);border-radius:12px;font:inherit;outline:none}
+.card input:focus{border-color:var(--acc)}
+.card .go{width:100%;padding:11px;border-radius:12px;background:var(--txt);color:#fff;margin-top:4px}
+#authErr{color:var(--red);font-size:13px;min-height:18px;margin-top:8px;text-align:center}
+/* app */
+#app{display:flex;height:100%}
+aside{width:280px;background:var(--side);border-right:1px solid var(--line);display:flex;flex-direction:column;flex:none}
+.brand{padding:16px 16px 8px;font-weight:700;font-size:18px}
+.nav{padding:0 8px}
+.nav button,.item{display:flex;align-items:center;gap:8px;width:100%;padding:9px 10px;border-radius:10px;text-align:left}
+.nav button:hover,.item:hover{background:var(--hover)}
+.nav button.first{background:var(--hover)}
+.sec{padding:16px 18px 6px;color:var(--mut);font-size:13px}
+#list{flex:1;overflow:auto;padding:0 8px}
+.item{font-size:14px;position:relative}
+.item.on{background:var(--hover)}
+.item .t{flex:1;min-width:0}
+.item .t b{display:block;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;font-weight:500}
+.item .t small{display:block;color:var(--mut);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.item .del{opacity:0;color:var(--mut);padding:0 4px}
+.item:hover .del{opacity:1}
+.badge{background:var(--red);color:#fff;border-radius:99px;font-size:11px;padding:1px 8px;white-space:nowrap}
+.dot3{width:8px;height:8px;border-radius:50%;background:var(--acc);flex:none}
+.me{display:flex;align-items:center;gap:10px;padding:12px;border-top:1px solid var(--line)}
+.av{width:32px;height:32px;border-radius:50%;background:#9b59b6;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700;flex:none}
+.me .n{flex:1;min-width:0;line-height:1.2}.me small{color:var(--mut)}
+.me button{color:var(--mut);font-size:13px;padding:6px 8px;border-radius:8px}.me button:hover{background:var(--hover)}
+main{flex:1;display:flex;flex-direction:column;min-width:0;height:100%}
+#top{display:flex;align-items:center;gap:8px;padding:10px 16px;font-weight:600;min-height:48px}
+#menu{display:none;font-size:20px}
+#msgs{flex:1;overflow:auto;padding:8px 0 20px}
+main.empty{justify-content:center}
+main.empty #msgs{flex:none;overflow:visible;padding:0}
+main.empty #top{position:absolute;top:0}
+.hero{text-align:center;font-size:28px;font-weight:500;margin:0 0 24px;padding:0 20px}
+.row{max-width:780px;margin:0 auto;padding:8px 20px;display:flex;gap:12px}
+.row.u{justify-content:flex-end}
+.bub{background:#f0f0f0;border-radius:20px;padding:8px 16px;max-width:75%;word-wrap:break-word}
+.row.a .body{min-width:0;max-width:100%;word-wrap:break-word}
+.logo{width:28px;height:28px;border-radius:50%;border:1px solid var(--line);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:800;flex:none}
+.meta{color:var(--mut);font-size:12px;margin-top:4px}
+.txt{white-space:pre-wrap}
+pre{background:#0d0d0d;color:#eee;padding:12px 14px;border-radius:12px;overflow:auto;margin:8px 0;white-space:pre;font:13px/1.5 Consolas,monospace}
+.pic{max-width:300px;max-height:300px;border-radius:14px;display:block;margin-bottom:6px;cursor:zoom-in}
+.typing{display:flex;align-items:center;gap:6px;height:28px}
+.typing i{width:8px;height:8px;border-radius:50%;background:#999;animation:b 1.2s infinite}
+.typing i:nth-child(2){animation-delay:.2s}.typing i:nth-child(3){animation-delay:.4s}
+@keyframes b{0%,60%,100%{opacity:.25;transform:translateY(0)}30%{opacity:1;transform:translateY(-4px)}}
+#comp{max-width:780px;width:100%;margin:0 auto;padding:0 20px 18px}
+#banner{background:#fff4f4;border:1px solid #f5c6c8;color:#a1262a;border-radius:12px;padding:8px 14px;margin-bottom:8px;font-size:14px}
+#prev{display:flex;margin-bottom:8px}
+#prev div{position:relative}
+#prev img{height:64px;border-radius:10px;border:1px solid var(--line)}
+#prev button{position:absolute;top:-6px;right:-6px;background:#333;color:#fff;border-radius:50%;width:20px;height:20px;font-size:12px;line-height:20px}
+.bar{display:flex;align-items:flex-end;gap:8px;background:#fff;border:1px solid var(--line);border-radius:28px;box-shadow:0 2px 14px rgba(0,0,0,.06);padding:8px 10px}
+.bar textarea{flex:1;border:0;outline:0;resize:none;font:inherit;max-height:180px;padding:7px 4px;background:none}
+.bar .plus{width:36px;height:36px;border-radius:50%;font-size:22px;color:#555}.bar .plus:hover{background:var(--hover)}
+.bar .snd{width:36px;height:36px;border-radius:50%;background:var(--acc);color:#fff;font-size:18px}
+.bar .snd:disabled,.bar .plus:disabled{opacity:.4;cursor:not-allowed}
+.foot{text-align:center;color:var(--mut);font-size:12px;margin-top:8px}
+@media(max-width:760px){
+ aside{position:fixed;z-index:5;height:100%;left:-290px;transition:left .2s}
+ aside.open{left:0;box-shadow:0 0 30px rgba(0,0,0,.2)}
+ #menu{display:block}.hero{font-size:22px}
 }
 </style>
 </head>
-<body class="locked">
+<body>
 
-<!-- ============ INTRO VIDEO ============ -->
-<div id="intro">
-  <video id="introVideo" src="YTSave_YouTube_Media_ju-jnDopEAw_All-the-Reasons-Ford-Super-Duty_001_1080p.mp4"
-         autoplay muted playsinline preload="auto"></video>
-  <div class="intro-brand">
-    <h2>LONG BIÊN <b>FORD</b></h2>
-    <p>Đại lý ủy quyền — Ford Việt Nam</p>
-  </div>
-  <div class="intro-ui">
-    <span class="hint">Đang phát video giới thiệu</span>
-    <button class="ibtn" id="soundBtn">🔇 Bật tiếng</button>
-    <button class="ibtn solid" id="skipBtn">Bỏ qua ⏭</button>
-  </div>
-  <div id="vprog"></div>
-</div>
-
-<!-- nền -->
-<div class="orb" id="orb1"></div><div class="orb" id="orb2"></div><div class="orb" id="orb3"></div>
-<div id="particles" aria-hidden="true"></div>
-<div id="glow" aria-hidden="true"></div>
-<div id="prog"></div>
-
-<!-- silhouettes xe -->
-<svg width="0" height="0" style="position:absolute" aria-hidden="true">
-  <symbol id="v-pickup" viewBox="0 0 240 96">
-    <path fill-rule="evenodd" d="M10 70 L10 52 Q10 45 20 43 L82 38 L97 21 Q100 16 107 16 L152 16 Q159 16 162 22 L170 38 L216 46 Q230 49 230 58 L230 70 L206 70 A24 24 0 0 0 158 70 L94 70 A24 24 0 0 0 46 70 Z M70 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M182 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
-    <circle cx="70" cy="70" r="19"/><circle cx="182" cy="70" r="19"/>
-  </symbol>
-  <symbol id="v-suv" viewBox="0 0 240 96">
-    <path fill-rule="evenodd" d="M10 70 L10 50 Q10 43 20 41 L48 36 L64 18 Q67 14 74 14 L156 14 Q163 14 167 19 L182 36 L218 42 Q230 45 230 54 L230 70 L206 70 A24 24 0 0 0 158 70 L94 70 A24 24 0 0 0 46 70 Z M70 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M182 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
-    <circle cx="70" cy="70" r="19"/><circle cx="182" cy="70" r="19"/>
-  </symbol>
-  <symbol id="v-van" viewBox="0 0 240 96">
-    <path fill-rule="evenodd" d="M10 70 L10 18 Q10 12 16 12 L146 12 Q152 12 156 17 L172 37 L218 44 Q230 47 230 56 L230 70 L206 70 A24 24 0 0 0 158 70 L94 70 A24 24 0 0 0 46 70 Z M70 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M182 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
-    <circle cx="70" cy="70" r="19"/><circle cx="182" cy="70" r="19"/>
-  </symbol>
-  <symbol id="v-sport" viewBox="0 0 240 96">
-    <path fill-rule="evenodd" d="M10 70 L12 54 Q16 44 34 41 L64 37 L82 22 Q86 17 94 17 L142 17 Q158 17 172 28 L196 40 Q226 46 228 56 L228 70 L204 70 A24 24 0 0 0 156 70 L96 70 A24 24 0 0 0 48 70 Z M72 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0 M180 70 m-8 0 a8 8 0 1 0 16 0 a8 8 0 1 0 -16 0"/>
-    <circle cx="72" cy="70" r="19"/><circle cx="180" cy="70" r="19"/>
-  </symbol>
-</svg>
-
-<nav>
-  <div class="nav-in">
-    <a class="logo" href="#home"><i>F</i>Ford&nbsp;<em>Long Biên</em></a>
-    <button id="menuBtn" aria-label="Menu">≡</button>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#about">Giới thiệu</a></li>
-      <li><a href="#models">Dòng xe</a></li>
-      <li><a href="#price">Bảng giá</a></li>
-      <li><a href="#services">Dịch vụ</a></li>
-      <li><a href="#promo">Khuyến mãi</a></li>
-      <li><a href="#contact">Liên hệ</a></li>
-    </ul>
-    <a class="nav-call" href="tel:0877588811">0877 588 811</a>
-  </div>
-</nav>
-
-<!-- ============ HERO ============ -->
-<header id="home">
-  <div class="hero-car" id="heroCar"><svg viewBox="0 0 240 96"><use href="#v-pickup"/></svg></div>
-  <div class="car-shadow" aria-hidden="true"></div>
-  <div class="wrap" style="position:relative;z-index:2;width:100%">
-    <span class="eyebrow">Đại lý ủy quyền — Ford Việt Nam</span>
-    <h1><span class="split">FORD</span><br><span class="grad split">LONG BIÊN</span></h1>
-    <p class="hero-sub">Tổng quan đại lý & <b>thông tin cập nhật 2026</b> — địa chỉ, sản phẩm, giá, dịch vụ và <b>lưu ý khi đọc thông tin</b>.</p>
-    <div class="hero-cta">
-      <a class="btn btn-solid" href="#price" data-mag>Xem bảng giá</a>
-      <a class="btn btn-ghost" href="tel:0877588811" data-mag>Gọi 0877 588 811</a>
-    </div>
-    <div class="hero-pills">
-      <div class="pill"><b data-count="2017" data-plain="2017">0</b><span>Thành lập 7/3/2017</span></div>
-      <div class="pill"><b><span data-count="6000">0</span> m²</b><span>Showroom & xưởng</span></div>
-      <div class="pill"><b data-count="40">0</b><span>Khoang dịch vụ</span></div>
-      <div class="pill"><b data-count="180">0</b><span>Lượt xe/ngày</span></div>
-    </div>
-  </div>
-  <div class="coords">
-    <div class="wrap" style="display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;width:100%">
-      <span>21.0286°N / 105.8522°E — Số 3 Nguyễn Văn Linh, Việt Hưng, Hà Nội</span>
-      <span>Cập nhật 28/09/2026</span>
-    </div>
-  </div>
-</header>
-
-<div class="ticker" aria-hidden="true">
-  <div class="ticker-track">
-    <span>Ranger&nbsp;//&nbsp;Ranger Raptor&nbsp;//&nbsp;Everest&nbsp;//&nbsp;Territory&nbsp;//&nbsp;Explorer&nbsp;//&nbsp;Transit&nbsp;//&nbsp;Mustang Mach-E&nbsp;//&nbsp;Ranger&nbsp;//&nbsp;Ranger Raptor&nbsp;//&nbsp;Everest&nbsp;//&nbsp;Territory&nbsp;//&nbsp;Explorer&nbsp;//&nbsp;Transit&nbsp;//&nbsp;Mustang Mach-E&nbsp;//&nbsp;</span>
-    <span>Ranger&nbsp;//&nbsp;Ranger Raptor&nbsp;//&nbsp;Everest&nbsp;//&nbsp;Territory&nbsp;//&nbsp;Explorer&nbsp;//&nbsp;Transit&nbsp;//&nbsp;Mustang Mach-E&nbsp;//&nbsp;Ranger&nbsp;//&nbsp;Ranger Raptor&nbsp;//&nbsp;Everest&nbsp;//&nbsp;Territory&nbsp;//&nbsp;Explorer&nbsp;//&nbsp;Transit&nbsp;//&nbsp;Mustang Mach-E&nbsp;//&nbsp;</span>
+<div id="auth" hidden>
+  <div class="card">
+    <h1>C0C0 GPT</h1>
+    <p class="sub">Đăng nhập để bắt đầu trò chuyện</p>
+    <div class="tabs"><button id="tLogin" class="on" type="button">Đăng nhập</button><button id="tReg" type="button">Tạo tài khoản</button></div>
+    <form id="authForm">
+      <input id="u" placeholder="Tên đăng nhập" autocomplete="username" required>
+      <input id="p" type="password" placeholder="Mật khẩu" autocomplete="current-password" required>
+      <button class="go" id="goBtn">Đăng nhập</button>
+      <div id="authErr"></div>
+    </form>
   </div>
 </div>
 
-<main style="position:relative;z-index:2">
-
-<!-- ============ 01 ============ -->
-<section id="about">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">01</span><h2 class="sec-title">Chân dung <b>Long Biên Ford</b></h2><span class="sec-tag">Hồ sơ đại lý</span></div>
-    <div class="about">
-      <div class="reveal">
-        <p class="lead" style="margin-bottom:18px">Long Biên Ford là <b>đại lý ủy quyền của Ford Việt Nam</b>, đi vào hoạt động từ ngày <b>7/3/2017</b> trên trục Nguyễn Văn Linh — cửa ngõ phía Đông Hà Nội.</p>
-        <p class="lead" style="margin-bottom:0">Showroom và xưởng dịch vụ đạt <b>tiêu chuẩn Ford toàn cầu</b> với tổng diện tích hơn 6.000 m². Từ bán tải, SUV đô thị, SUV full-size đến xe thương mại và xe điện — trọn vòng đời: <b>tư vấn · lái thử · trả góp · bảo dưỡng · cứu hộ</b>.</p>
-        <p class="since">EST. <b>07 / 03 / 2017</b> — HÀ NỘI</p>
+<div id="app" hidden>
+  <aside id="side">
+    <div class="brand">C0C0 GPT</div>
+    <div class="nav"><button id="newChat" class="first">✎ <span>Trò chuyện mới</span></button></div>
+    <div class="sec" id="secTitle">Gần đây</div>
+    <div id="list"></div>
+    <div class="me"><div class="av" id="av"></div><div class="n"><div id="meName"></div><small id="meRole"></small></div><button id="logout">Đăng xuất</button></div>
+  </aside>
+  <main id="main" class="empty">
+    <div id="top"><button id="menu">☰</button><span id="title">C0C0 GPT</span></div>
+    <div id="msgs"></div>
+    <div id="comp">
+      <div id="banner" hidden></div>
+      <div id="prev" hidden></div>
+      <div class="bar">
+        <button class="plus" id="plus" title="Gửi ảnh">+</button>
+        <input type="file" id="file" accept="image/*" hidden>
+        <textarea id="input" rows="1" placeholder="Hỏi C0C0 GPT"></textarea>
+        <button class="snd" id="snd">↑</button>
       </div>
-      <div class="glass kv reveal" style="position:relative">
-        <span class="badge-float">Ford Vietnam Dealer</span>
-        <div><dt>Địa chỉ</dt><dd>Số 3 Nguyễn Văn Linh, phường Việt Hưng, Hà Nội</dd></div>
-        <div><dt>Quy mô</dt><dd>Hơn 6.000 m²<small>Xưởng dịch vụ tiêu chuẩn Ford</small></dd></div>
-        <div><dt>Hotline KD</dt><dd><a href="tel:0877588811">0877 588 811</a> <small>Kinh doanh / CSKH</small></dd></div>
-        <div><dt>Hotline DV</dt><dd><a href="tel:0888132266">0888 132 266</a> <small>Dịch vụ</small></dd></div>
-        <div><dt>Email</dt><dd><a href="mailto:longbienford.cskh@gmail.com">longbienford.cskh@gmail.com</a></dd></div>
-        <div><dt>MST</dt><dd>0107596635</dd></div>
-      </div>
+      <div class="foot" id="foot"></div>
     </div>
-  </div>
-</section>
-
-<!-- ============ 02 ============ -->
-<section id="models">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">02</span><h2 class="sec-title">Dòng xe <b>đang phân phối</b></h2><span class="sec-tag">7 dòng xe</span></div>
-    <p class="lead reveal">Đa dạng lựa chọn, đáp ứng mọi nhu cầu <b>công việc và cuộc sống</b>.</p>
-    <div class="mgrid" data-stagger>
-      <div class="glass mcard" data-tilt data-spot><span class="idx">/01</span><svg viewBox="0 0 240 96"><use href="#v-pickup"/></svg><h3>Ford Ranger</h3><p>Bán tải</p></div>
-      <div class="glass mcard" data-tilt data-spot><span class="idx">/02</span><svg viewBox="0 0 240 96"><use href="#v-pickup"/></svg><h3>Ranger Raptor</h3><p>Bán tải hiệu năng cao</p></div>
-      <div class="glass mcard" data-tilt data-spot><span class="idx">/03</span><svg viewBox="0 0 240 96"><use href="#v-suv"/></svg><h3>Ford Everest</h3><p>SUV 7 chỗ</p></div>
-      <div class="glass mcard" data-tilt data-spot><span class="idx">/04</span><svg viewBox="0 0 240 96"><use href="#v-suv"/></svg><h3>Ford Territory</h3><p>SUV đô thị</p></div>
-      <div class="glass mcard" data-tilt data-spot><span class="idx">/05</span><svg viewBox="0 0 240 96"><use href="#v-suv"/></svg><h3>Ford Explorer</h3><p>SUV full-size</p></div>
-      <div class="glass mcard" data-tilt data-spot><span class="idx">/06</span><svg viewBox="0 0 240 96"><use href="#v-van"/></svg><h3>Ford Transit</h3><p>Xe thương mại</p></div>
-      <div class="glass mcard" data-tilt data-spot><span class="idx">/07</span><svg viewBox="0 0 240 96"><use href="#v-sport"/></svg><h3>Mustang / Mach-E</h3><p>Xe thể thao / SUV điện</p></div>
-    </div>
-    <div class="glass strip reveal">
-      <p>Truy cập website để gửi yêu cầu tư vấn và <b>đăng ký lái thử</b> từng mẫu xe.</p>
-      <a class="btn btn-ghost" href="mailto:longbienford.cskh@gmail.com?subject=Đăng ký lái thử" data-mag>Đăng ký lái thử</a>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 03 ============ -->
-<section id="price">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">03</span><h2 class="sec-title">Bảng giá tham khảo — <b>Ford Ranger</b></h2><span class="sec-tag">Tháng 7/2026</span></div>
-    <div class="reveal" data-stagger>
-      <div class="prow"><div class="prow-top"><span class="pname">XLS 4×2 AT</span><span class="pval">707<small>triệu</small></span></div><div class="pbar"><i data-w="48.8%"></i></div></div>
-      <div class="prow"><div class="prow-top"><span class="pname">XLS+ 4×4 AT</span><span class="pval">776<small>triệu</small></span></div><div class="pbar"><i data-w="53.6%"></i></div></div>
-      <div class="prow"><div class="prow-top"><span class="pname">Sport 4×4 AT</span><span class="pval">864<small>triệu</small></span></div><div class="pbar"><i data-w="59.7%"></i></div></div>
-      <div class="prow"><div class="prow-top"><span class="pname">Wildtrak 4×4 AT</span><span class="pval">979<small>triệu</small></span></div><div class="pbar"><i data-w="67.6%"></i></div></div>
-      <div class="prow"><div class="prow-top"><span class="pname">Stormtrak 4×4 AT</span><span class="pval">1,039<small>tỷ</small></span></div><div class="pbar"><i data-w="71.8%"></i></div></div>
-      <div class="prow"><div class="prow-top"><span class="pname">Ranger Raptor 2.0L</span><span class="pval">1,299<small>tỷ</small></span></div><div class="pbar"><i data-w="89.7%"></i></div></div>
-      <div class="prow"><div class="prow-top"><span class="pname">Ranger Raptor 3.0L 4WD AT</span><span class="pval">1,448<small>tỷ</small></span></div><div class="pbar"><i data-w="100%"></i></div></div>
-    </div>
-    <div class="glass note-glass reveal"><b>Lưu ý</b><p>Giá niêm yết tham khảo, chưa gồm chi phí lăn bánh và khuyến mại.</p></div>
-
-    <div class="compare">
-      <h3 class="reveal">So sánh giá <b>các dòng khác</b></h3>
-      <p class="lead reveal">(Tham khảo — tháng 7/2026)</p>
-      <div class="reveal" data-stagger>
-        <div class="prow"><div class="prow-top"><span class="pname">Territory</span><span class="pval">~739<small>triệu</small></span></div><div class="pbar"><i data-w="43.5%"></i></div></div>
-        <div class="prow"><div class="prow-top"><span class="pname">Transit</span><span class="pval">~907<small>triệu</small></span></div><div class="pbar"><i data-w="53.4%"></i></div></div>
-        <div class="prow"><div class="prow-top"><span class="pname">Everest</span><span class="pval">~1,129<small>tỷ</small></span></div><div class="pbar"><i data-w="66.4%"></i></div></div>
-        <div class="prow"><div class="prow-top"><span class="pname">Ranger Raptor</span><span class="pval">~1,448<small>tỷ</small></span></div><div class="pbar"><i data-w="85.2%"></i></div></div>
-        <div class="prow"><div class="prow-top"><span class="pname">Mustang Mach-E</span><span class="pval">~1,699<small>tỷ</small></span></div><div class="pbar"><i data-w="100%"></i></div></div>
-      </div>
-      <div class="glass note-glass reveal"><b>Lưu ý</b><p>Giá chưa bao gồm khuyến mại, lăn bánh.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 04 ============ -->
-<section id="services">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">04</span><h2 class="sec-title">Hệ sinh thái <b>dịch vụ</b></h2><span class="sec-tag">Trọn vòng đời xe</span></div>
-    <div class="reveal" data-stagger>
-      <div class="srow"><span class="snum">S.01</span><h4>Tư vấn và báo giá xe</h4><span>Kinh doanh</span></div>
-      <div class="srow"><span class="snum">S.02</span><h4>Lái thử xe — hỗ trợ lái thử tại nhà theo quy định</h4><span>Kinh doanh</span></div>
-      <div class="srow"><span class="snum">S.03</span><h4>Hỗ trợ mua xe trả góp</h4><span>Tài chính</span></div>
-      <div class="srow"><span class="snum">S.04</span><h4>Bảo dưỡng, sửa chữa với 40 khoang xưởng</h4><span>Dịch vụ</span></div>
-      <div class="srow"><span class="snum">S.05</span><h4>Phụ tùng chính hãng</h4><span>Dịch vụ</span></div>
-      <div class="srow"><span class="snum">S.06</span><h4>Đặt lịch dịch vụ online</h4><span>Dịch vụ</span></div>
-      <div class="srow"><span class="snum">S.07</span><h4>Cứu hộ giao thông 24/7</h4><span>Dịch vụ</span></div>
-    </div>
-    <div class="dstats">
-      <div class="glass reveal"><div class="n"><span data-count="180">0</span></div><div class="l">Lượt xe/ngày theo website</div></div>
-      <div class="glass reveal"><div class="n"><span data-count="40">0</span></div><div class="l">Khoang xưởng tiêu chuẩn</div></div>
-      <div class="glass reveal"><div class="n">24/7</div><div class="l">Cứu hộ giao thông</div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 05 ============ -->
-<section id="promo">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">05</span><h2 class="sec-title">Khuyến mãi <b>cập nhật 7/2026</b></h2><span class="sec-tag">Ưu đãi theo tháng</span></div>
-    <div class="pcols">
-      <div class="glass pcol done reveal"><div class="status"><span class="dot"></span>Đã kết thúc</div><div class="month">3/2026</div><p>Hỗ trợ lệ phí trước bạ — chương trình không còn áp dụng.</p></div>
-      <div class="glass pcol live reveal"><div class="status"><span class="dot"></span>Đang áp dụng</div><div class="month">7/2026</div><p>Khuyến mãi cập nhật cho <b>Ranger, Everest</b> và khuyến mại mùa hè.</p></div>
-    </div>
-    <p class="pnote reveal">Ưu đãi thay đổi <b>theo tháng và phiên bản</b>. Hãy kiểm tra thông tin mới nhất trước khi quyết định mua, hoặc <a href="tel:0877588811"><b>liên hệ Ford Long Biên</b></a> để được tư vấn ưu đãi hiện hành.</p>
-  </div>
-</section>
-
-<!-- ============ 06 ============ -->
-<section id="notes">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">06</span><h2 class="sec-title">Lưu ý khi đọc <b>thông tin trên website</b></h2><span class="sec-tag">Cần xem xét kỹ</span></div>
-    <div class="reveal" data-stagger>
-      <div class="nrow"><span class="nnum">01</span><p>Một số nội dung chỉ mang tính <b>quảng bá</b> — cần xác minh trước khi quyết định.</p></div>
-      <div class="nrow"><span class="nnum">02</span><p>Số liệu và thông tin trên website là do <b>đại lý công bố tại thời điểm hiện tại</b>.</p></div>
-      <div class="nrow"><span class="nnum">03</span><p>Khuyến nghị tham khảo thêm thông tin từ <b>Ford Việt Nam</b> hoặc hợp đồng thực tế.</p></div>
-      <div class="nrow"><span class="nnum">04</span><p>Liên hệ trực tiếp đại lý để cập nhật <b>chính xác và đầy đủ nhất</b>.</p></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============ 07 ============ -->
-<section id="contact">
-  <div class="wrap">
-    <div class="sec-head reveal"><span class="sec-num">07</span><h2 class="sec-title">Kết luận & <b>liên hệ</b></h2><span class="sec-tag">Liên hệ ngay</span></div>
-    <div class="contact">
-      <div class="reveal">
-        <p class="lead" style="margin-bottom:16px"><b>Long Biên Ford</b> là đại lý chính hãng với đa dạng xe, dịch vụ đầy đủ và giá tham khảo cập nhật.</p>
-        <p class="lead" style="margin-bottom:0">Hãy đọc kỹ thông tin quảng bá và kiểm tra khuyến mãi mới nhất trước khi quyết định mua.</p>
-        <p class="since">Số 3 Nguyễn Văn Linh<br>Phường Việt Hưng, Hà Nội</p>
-      </div>
-      <div>
-        <div class="glass ccard reveal" data-tilt data-spot><div class="l">Hotline kinh doanh / CSKH</div><a class="v" href="tel:0877588811">0877 588 811</a></div>
-        <div class="glass ccard reveal" data-tilt data-spot><div class="l">Hotline dịch vụ</div><a class="v" href="tel:0888132266">0888 132 266</a></div>
-        <div class="glass ccard reveal" data-tilt data-spot style="margin-bottom:0"><div class="l">Email</div><a class="v small" href="mailto:longbienford.cskh@gmail.com">longbienford.cskh@gmail.com</a></div>
-      </div>
-    </div>
-    <div class="slogan reveal">Uy tín dẫn lối<br><span>trải nghiệm vượt trội</span></div>
-  </div>
-</section>
-
-</main>
-
-<footer>
-  <div class="wrap">
-    <span>© 2026 Long Biên Ford — MST 0107596635</span>
-    <span>Thông tin chỉ mang tính tham khảo. Vui lòng liên hệ đại lý để có thông tin chính xác nhất.</span>
-  </div>
-</footer>
-
-<a href="#home" class="glass" id="top" aria-label="Về đầu trang">↑</a>
+  </main>
+</div>
 
 <script>
-const $=(s,c=document)=>c.querySelector(s),$$=(s,c=document)=>[...c.querySelectorAll(s)];
-const fine=matchMedia('(hover:hover) and (pointer:fine)').matches;
+const $ = s => document.querySelector(s);
+let me = null, active = null, pending = false, waitBase = 0, waitAt = 0, sig = '', file = null, mode = 'login';
 
-/* ============ INTRO VIDEO ============ */
-const intro=$('#intro'),video=$('#introVideo'),vprog=$('#vprog'),
-      soundBtn=$('#soundBtn'),skipBtn=$('#skipBtn');
-let introFinished=false;
+async function api(url, opt = {}) {
+  const r = await fetch(url, opt); let d = {};
+  try { d = await r.json(); } catch (e) {}
+  if (!r.ok) throw new Error(d.error || 'Có lỗi xảy ra');
+  return d;
+}
+const jpost = (u, b) => api(u, {method: 'POST', headers: {'Content-Type': 'application/json'}, body: JSON.stringify(b || {})});
+const esc = s => s.replace(/[&<>"]/g, c => ({'&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;'}[c]));
+const tokens = sec => Math.floor(sec * 10 / 2);          // (số giây x 10) / 2
+const elapsed = () => waitBase + (Date.now() - waitAt) / 1000;
 
-function finishIntro(){
-  if(introFinished)return; introFinished=true;
-  video.pause();
-  intro.classList.add('done');
-  document.body.classList.remove('locked');
-  document.body.classList.add('ready');      // ← mở khoá toàn bộ animation hero
-  initSite();                                 // ← bật observer reveal + counter + bar giá
-  setTimeout(()=>intro.remove(),1100);
+function fmt(text) {                                      // ```code``` + xuống dòng
+  return text.split('```').map((p, i) => i % 2
+    ? '<pre>' + esc(p.replace(/^\w*\n/, '')) + '</pre>'
+    : '<span class="txt">' + esc(p) + '</span>').join('');
 }
 
-video.addEventListener('ended',finishIntro);
-video.addEventListener('error',finishIntro);
-skipBtn.onclick=finishIntro;
-addEventListener('keydown',e=>{if(!introFinished&&(e.key==='Escape'||e.key==='Enter'))finishIntro()});
-
-/* nếu video lỗi/treo quá 7s thì tự bỏ qua intro */
-setTimeout(()=>{if(!introFinished&&(video.readyState<3||video.paused))finishIntro()},7000);
-
-/* khi video thật sự chạy → ẩn brand, hiện thanh tiến trình */
-video.addEventListener('playing',()=>intro.classList.add('playing'));
-video.addEventListener('timeupdate',()=>{
-  if(video.duration)vprog.style.width=(video.currentTime/video.duration*100)+'%';
-});
-
-/* bật/tắt tiếng (cần 1 cú click của người dùng nên hợp lệ) */
-soundBtn.onclick=()=>{
-  video.muted=!video.muted;
-  soundBtn.textContent=video.muted?'🔇 Bật tiếng':'🔊 Đang bật tiếng';
+/* ---------- auth ---------- */
+function setMode(m) {
+  mode = m; $('#tLogin').classList.toggle('on', m === 'login'); $('#tReg').classList.toggle('on', m === 'register');
+  $('#goBtn').textContent = m === 'login' ? 'Đăng nhập' : 'Tạo tài khoản'; $('#authErr').textContent = '';
+}
+$('#tLogin').onclick = () => setMode('login'); $('#tReg').onclick = () => setMode('register');
+$('#authForm').onsubmit = async e => {
+  e.preventDefault();
+  try { await jpost('/api/' + mode, {username: $('#u').value, password: $('#p').value}); $('#p').value = ''; boot(); }
+  catch (err) { $('#authErr').textContent = err.message; }
 };
+$('#logout').onclick = async () => { await jpost('/api/logout'); active = null; boot(); };
 
-/* ============ HẠT BAY NGƯỢC TRỌNG LỰC ============ */
-(()=>{const pc=$('#particles');for(let i=0;i<34;i++){const d=document.createElement('i'),s=Math.random()*2.4+1;
-d.style.cssText=`left:${Math.random()*100}%;width:${s}px;height:${s}px;--o:${(Math.random()*.35+.12).toFixed(2)};animation-duration:${(Math.random()*14+13).toFixed(1)}s;animation-delay:${(-Math.random()*22).toFixed(1)}s`;
-pc.appendChild(d)}})();
-
-/* ============ GLOW BÁM CON TRỎ ============ */
-if(fine){const g=$('#glow');let gx=innerWidth/2,gy=innerHeight/2,tx=gx,ty=gy;
-addEventListener('mousemove',e=>{tx=e.clientX;ty=e.clientY});
-(function loop(){gx+=(tx-gx)*.07;gy+=(ty-gy)*.07;g.style.transform=`translate(${gx-320}px,${gy-320}px)`;requestAnimationFrame(loop)})()}else $('#glow').style.display='none';
-
-/* ============ NAV + PROGRESS + TOP ============ */
-const nav=$('nav'),prog=$('#prog'),topBtn=$('#top');
-addEventListener('scroll',()=>{const y=scrollY,h=document.documentElement.scrollHeight-innerHeight;
-nav.classList.toggle('scrolled',y>40);prog.style.width=(y/h*100)+'%';topBtn.classList.toggle('show',y>600)},{passive:true});
-
-/* ============ MENU MOBILE ============ */
-const mb=$('#menuBtn'),nl=$('#navLinks');
-mb.onclick=()=>nl.classList.toggle('open');
- $$('a',nl).forEach(a=>a.onclick=()=>nl.classList.remove('open'));
-
-/* ============ CHỮ HERO RƠI TỪNG KÝ TỰ (chờ body.ready mới chạy) ============ */
- $$('.split').forEach(el=>{const t=el.textContent;el.textContent='';[...t].forEach((ch,i)=>{
-const s=document.createElement('span');s.className='ch';s.style.animationDelay=(i*55+150)+'ms';
-s.innerHTML=ch===' '?'&nbsp;':ch;el.appendChild(s)})});
-
-/* ============ TILT 3D ============ */
-if(fine)$$('[data-tilt]').forEach(c=>{
-c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect(),rx=((e.clientY-r.top)/r.height-.5)*-7,ry=((e.clientX-r.left)/r.width-.5)*7;
-c.style.transform=`perspective(900px) rotateX(${rx}deg) rotateY(${ry}deg) translateY(-4px)`});
-c.addEventListener('mouseleave',()=>c.style.transform='')});
-
-/* ============ SPOTLIGHT THEO CHUỘT ============ */
- $$('[data-spot]').forEach(c=>c.addEventListener('mousemove',e=>{const r=c.getBoundingClientRect();
-c.style.setProperty('--mx',(e.clientX-r.left)+'px');c.style.setProperty('--my',(e.clientY-r.top)+'px')}));
-
-/* ============ NÚT NAM CHÂM ============ */
-if(fine)$$('[data-mag]').forEach(b=>{
-b.addEventListener('mousemove',e=>{const r=b.getBoundingClientRect(),x=(e.clientX-r.left-r.width/2)*.26,y=(e.clientY-r.top-r.height/2)*.26;
-b.style.transform=`translate(${x}px,${y}px)`});
-b.addEventListener('mouseleave',()=>b.style.transform='')});
-
-/* ============ PARALLAX HERO ============ */
-if(fine){const car=$('#heroCar'),o1=$('#orb1'),o2=$('#orb2');
-addEventListener('mousemove',e=>{const x=e.clientX/innerWidth-.5,y=e.clientY/innerHeight-.5;
-car&&(car.style.transform=`translate(${x*28}px,${y*20}px)`);
-o1&&(o1.style.transform=`translate(${x*-44}px,${y*-32}px)`);
-o2&&(o2.style.transform=`translate(${x*34}px,${y*26}px)`)})}
-
-/* ============ INIT SAU KHI INTRO KẾT THÚC ============ */
-let siteInited=false;
-function initSite(){
-  if(siteInited)return; siteInited=true;
-
-  /* reveal + stagger */
-  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target)}}),{threshold:.15});
-  $$('.reveal,[data-stagger]').forEach(el=>io.observe(el));
-
-  /* counter đếm số */
-  const nf=new Intl.NumberFormat('vi-VN');
-  const cio=new IntersectionObserver(es=>es.forEach(e=>{if(!e.isIntersecting)return;const el=e.target,t=+el.dataset.count;let s=null;
-  const step=ts=>{s??=ts;const p=Math.min((ts-s)/1500,1);el.textContent=nf.format(Math.round(t*(1-Math.pow(1-p,3))));if(p<1)requestAnimationFrame(step)};
-  requestAnimationFrame(step);cio.unobserve(el)}),{threshold:.6});
-  $$('[data-count]').forEach(el=>cio.observe(el));
-
-  /* bar giá chạy khi hiện */
-  const bio=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){e.target.style.width=e.target.dataset.w;bio.unobserve(e.target)}}),{threshold:.4});
-  $$('.pbar i').forEach(b=>bio.observe(b));
+async function boot() {
+  try { me = (await api('/api/me')).user; } catch (e) { me = null; }
+  $('#auth').hidden = !!me; $('#app').hidden = !me;
+  if (!me) return;
+  $('#meName').textContent = me.username; $('#av').textContent = me.username.slice(0, 2).toUpperCase();
+  $('#meRole').textContent = me.is_admin ? 'Admin · người trả lời' : 'Free';
+  $('#newChat').hidden = me.is_admin;
+  $('#secTitle').textContent = me.is_admin ? 'Hộp thư đến' : 'Gần đây';
+  $('#foot').textContent = me.is_admin ? 'Bạn đang trả lời với tư cách C0C0 GPT' : 'C0C0 GPT có thể mắc lỗi. Hãy kiểm tra thông tin quan trọng.';
+  active = null; sig = ''; renderEmpty(); refreshList();
 }
+
+/* ---------- list ---------- */
+async function refreshList() {
+  if (!me) return;
+  try {
+    const d = await api(me.is_admin ? '/api/admin/inbox' : '/api/chats');
+    $('#list').innerHTML = d.chats.map(c => me.is_admin ? `
+      <button class="item ${c.id === active ? 'on' : ''}" data-id="${c.id}">
+        <div class="t"><b>${esc(c.username)}</b><small>${esc(c.preview)}</small></div>
+        ${c.pending ? `<span class="badge">đang chờ</span>` : ''}
+      </button>` : `
+      <button class="item ${c.id === active ? 'on' : ''}" data-id="${c.id}">
+        <div class="t"><b>${esc(c.title)}</b></div>
+        ${c.pending ? '<span class="dot3"></span>' : ''}
+        <span class="del" data-del="${c.id}" title="Xóa">✕</span>
+      </button>`).join('') || '<div class="sec">Chưa có hội thoại</div>';
+  } catch (e) {}
+}
+$('#list').onclick = async e => {
+  const del = e.target.closest('[data-del]');
+  if (del) {
+    e.stopPropagation();
+    if (!confirm('Xóa đoạn chat này?')) return;
+    await api('/api/chats/' + del.dataset.del, {method: 'DELETE'});
+    if (active == del.dataset.del) { active = null; renderEmpty(); }
+    return refreshList();
+  }
+  const it = e.target.closest('.item'); if (it) openChat(+it.dataset.id);
+};
+$('#newChat').onclick = () => { active = null; sig = ''; renderEmpty(); refreshList(); $('#side').classList.remove('open'); $('#input').focus(); };
+$('#menu').onclick = () => $('#side').classList.toggle('open');
+
+/* ---------- chat ---------- */
+function renderEmpty() {
+  $('#main').classList.add('empty'); pending = false; $('#banner').hidden = true; $('#title').textContent = 'C0C0 GPT';
+  $('#msgs').innerHTML = `<div class="hero">${me && me.is_admin ? 'Chọn một hội thoại ở hộp thư để trả lời' : 'Chúng ta nên bắt đầu từ đâu?'}</div>`;
+  $('#input').disabled = $('#snd').disabled = $('#plus').disabled = !!(me && me.is_admin);
+}
+function openChat(id) { active = id; sig = ''; loadChat(); refreshList(); $('#side').classList.remove('open'); }
+
+async function loadChat() {
+  if (!active) return;
+  let d; try { d = await api('/api/chats/' + active); } catch (e) { active = null; renderEmpty(); return; }
+  pending = d.waiting; waitBase = d.wait_seconds; waitAt = Date.now();
+  const s = d.messages.map(m => m.id).join(',') + '|' + d.waiting;
+  if (s !== sig) { sig = s; renderMsgs(d); }
+  tick();
+}
+function renderMsgs(d) {
+  const box = $('#msgs'), near = box.scrollHeight - box.scrollTop - box.clientHeight < 120 || !box.dataset.cid || box.dataset.cid != active;
+  $('#main').classList.toggle('empty', d.messages.length === 0 && !me.is_admin);
+  $('#title').textContent = me.is_admin ? d.chat.username + ' · ' + d.chat.title : d.chat.title;
+  $('#input').disabled = $('#snd').disabled = $('#plus').disabled = false;
+  let h = d.messages.map(m => {
+    const img = m.image ? `<a href="${m.image}" target="_blank"><img class="pic" src="${m.image}"></a>` : '';
+    if (m.role === 'user') return `<div class="row u"><div class="bub">${img}${m.content ? fmt(m.content) : ''}</div></div>`;
+    return `<div class="row a"><div class="logo">C0</div><div class="body">${img}${fmt(m.content || '')}${m.tokens ? `<div class="meta">${m.tokens} token</div>` : ''}</div></div>`;
+  }).join('');
+  if (d.waiting && !me.is_admin)
+    h += `<div class="row a"><div class="logo">C0</div><div class="body"><div class="typing"><i></i><i></i><i></i></div><div class="meta">Đang tạo câu trả lời · <span id="tok">0</span> token</div></div></div>`;
+  if (d.messages.length === 0 && !me.is_admin) h = '<div class="hero">Chúng ta nên bắt đầu từ đâu?</div>';
+  box.innerHTML = h; box.dataset.cid = active;
+  if (near) box.scrollTop = box.scrollHeight;
+}
+function tick() {                                           // cập nhật số token mỗi giây
+  const t = $('#tok'); if (t) t.textContent = tokens(elapsed());
+  const b = $('#banner');
+  if (me && me.is_admin && active && pending) {
+    b.hidden = false; b.textContent = `Người dùng đang chờ · ${Math.floor(elapsed())} giây · ${tokens(elapsed())} token`;
+  } else b.hidden = true;
+}
+setInterval(tick, 1000);
+setInterval(() => { refreshList(); loadChat(); }, 2500);
+
+/* ---------- gửi ---------- */
+async function send() {
+  const ta = $('#input'), text = ta.value.trim();
+  if (!text && !file) return;
+  const fd = new FormData(); fd.append('text', text); if (file) fd.append('image', file);
+  $('#snd').disabled = true;
+  try {
+    if (me.is_admin) { if (!active) return; await api(`/api/admin/chats/${active}/reply`, {method: 'POST', body: fd}); }
+    else {
+      if (!active) active = (await jpost('/api/chats')).id;
+      await api(`/api/chats/${active}/send`, {method: 'POST', body: fd});
+    }
+    ta.value = ''; clearFile(); size(); sig = ''; await loadChat(); refreshList();
+  } catch (e) { alert(e.message); }
+  $('#snd').disabled = false;
+}
+$('#snd').onclick = send;
+$('#input').onkeydown = e => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); send(); } };
+function size() { const t = $('#input'); t.style.height = 'auto'; t.style.height = Math.min(t.scrollHeight, 180) + 'px'; }
+$('#input').oninput = size;
+$('#plus').onclick = () => $('#file').click();
+$('#file').onchange = e => {
+  file = e.target.files[0]; if (!file) return;
+  $('#prev').hidden = false;
+  $('#prev').innerHTML = `<div><img src="${URL.createObjectURL(file)}"><button id="rm">✕</button></div>`;
+  $('#rm').onclick = clearFile;
+};
+function clearFile() { file = null; $('#file').value = ''; $('#prev').hidden = true; $('#prev').innerHTML = ''; }
+
+boot();
 </script>
 </body>
 </html>
